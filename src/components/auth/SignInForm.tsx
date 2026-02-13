@@ -5,16 +5,149 @@ import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { FormEvent, useState } from "react";
+
+type LoginErrors = {
+  email?: string;
+  password?: string;
+};
+
+type LoginResponse = {
+  message?: string;
+  errors?: {
+    email?: string[];
+    password?: string[];
+  };
+  data?: {
+    token?: string;
+    token_type?: string;
+    user?: unknown;
+  };
+};
 
 export default function SignInForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<LoginErrors>({});
+
+  const clearFieldError = (field: keyof LoginErrors): void => {
+    setFieldErrors((previousErrors) => ({
+      ...previousErrors,
+      [field]: undefined,
+    }));
+    setFormError(null);
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+
+    setIsSubmitting(true);
+    setFormError(null);
+    setFieldErrors({});
+
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+    const currentFieldErrors: LoginErrors = {};
+
+    if (!email) {
+      currentFieldErrors.email = "Email is required.";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      currentFieldErrors.email = "Enter a valid email address.";
+    }
+
+    if (!password) {
+      currentFieldErrors.password = "Password is required.";
+    }
+
+    if (currentFieldErrors.email || currentFieldErrors.password) {
+      setFieldErrors(currentFieldErrors);
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const apiBaseUrl =
+        process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://sass-starter.test";
+      const response = await fetch(`${apiBaseUrl}/api/v1/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as LoginResponse | null;
+
+      if (!response.ok) {
+        setFieldErrors({
+          email: payload?.errors?.email?.[0],
+          password: payload?.errors?.password?.[0],
+        });
+        setFormError(payload?.message ?? "Unable to sign in. Please try again.");
+        return;
+      }
+
+      const token = payload?.data?.token;
+
+      if (!token) {
+        setFormError("Login succeeded but no token was returned.");
+        return;
+      }
+
+      const tokenType = payload?.data?.token_type ?? "Bearer";
+      const serializedUser = payload?.data?.user
+        ? JSON.stringify(payload.data.user)
+        : null;
+      const isSecureContext = window.location.protocol === "https:";
+      const authCookieBase = `auth_token=${encodeURIComponent(token)}; Path=/; SameSite=Lax${
+        isSecureContext ? "; Secure" : ""
+      }`;
+
+      if (isChecked) {
+        localStorage.setItem("auth_token", token);
+        localStorage.setItem("auth_token_type", tokenType);
+
+        if (serializedUser) {
+          localStorage.setItem("auth_user", serializedUser);
+        }
+
+        sessionStorage.removeItem("auth_token");
+        sessionStorage.removeItem("auth_token_type");
+        sessionStorage.removeItem("auth_user");
+        document.cookie = `${authCookieBase}; Max-Age=${60 * 60 * 24 * 30}`;
+      } else {
+        sessionStorage.setItem("auth_token", token);
+        sessionStorage.setItem("auth_token_type", tokenType);
+
+        if (serializedUser) {
+          sessionStorage.setItem("auth_user", serializedUser);
+        }
+
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("auth_token_type");
+        localStorage.removeItem("auth_user");
+        document.cookie = authCookieBase;
+      }
+
+      router.push("/dashboard");
+    } catch {
+      setFormError("Network error while signing in. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full">
       <div className="w-full max-w-md sm:pt-10 mx-auto mb-5">
         <Link
-          href="/"
+          href="/dashboard"
           className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
         >
           <ChevronLeftIcon />
@@ -84,13 +217,24 @@ export default function SignInForm() {
                 </span>
               </div>
             </div>
-            <form>
+            <form onSubmit={handleSubmit}>
               <div className="space-y-6">
+                {formError ? (
+                  <p className="text-sm text-error-500">{formError}</p>
+                ) : null}
                 <div>
                   <Label>
                     Email <span className="text-error-500">*</span>{" "}
                   </Label>
-                  <Input placeholder="info@gmail.com" type="email" />
+                  <Input
+                    id="email"
+                    name="email"
+                    placeholder="info@gmail.com"
+                    type="email"
+                    error={Boolean(fieldErrors.email)}
+                    hint={fieldErrors.email}
+                    onChange={() => clearFieldError("email")}
+                  />
                 </div>
                 <div>
                   <Label>
@@ -98,8 +242,13 @@ export default function SignInForm() {
                   </Label>
                   <div className="relative">
                     <Input
+                      id="password"
+                      name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
+                      error={Boolean(fieldErrors.password)}
+                      hint={fieldErrors.password}
+                      onChange={() => clearFieldError("password")}
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -128,8 +277,8 @@ export default function SignInForm() {
                   </Link>
                 </div>
                 <div>
-                  <Button className="w-full" size="sm">
-                    Sign in
+                  <Button className="w-full" size="sm" disabled={isSubmitting}>
+                    {isSubmitting ? "Signing in..." : "Sign in"}
                   </Button>
                 </div>
               </div>
@@ -139,7 +288,7 @@ export default function SignInForm() {
               <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
                 Don&apos;t have an account? {""}
                 <Link
-                  href="/signup"
+                  href="/register"
                   className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
                 >
                   Sign Up

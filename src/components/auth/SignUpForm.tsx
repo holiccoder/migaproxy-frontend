@@ -2,18 +2,195 @@
 import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
+import Button from "@/components/ui/button/Button";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { FormEvent, useState } from "react";
+
+type RegisterErrors = {
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  password?: string;
+  password_confirmation?: string;
+};
+
+type RegisterResponse = {
+  message?: string;
+  errors?: {
+    name?: string[];
+    email?: string[];
+    password?: string[];
+    password_confirmation?: string[];
+  };
+  data?: {
+    token?: string;
+    token_type?: string;
+    user?: unknown;
+  };
+};
 
 export default function SignUpForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<RegisterErrors>({});
+
+  const clearFieldError = (field: keyof RegisterErrors): void => {
+    setFieldErrors((previousErrors) => ({
+      ...previousErrors,
+      [field]: undefined,
+    }));
+    setFormError(null);
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+
+    if (!isChecked) {
+      setFormError("You must accept the Terms and Privacy Policy to continue.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFormError(null);
+    setFieldErrors({});
+
+    const formData = new FormData(event.currentTarget);
+    const firstName = String(formData.get("first_name") ?? "").trim();
+    const lastName = String(formData.get("last_name") ?? "").trim();
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+    const passwordConfirmation = String(formData.get("password_confirmation") ?? "");
+    const name = `${firstName} ${lastName}`.trim();
+    const currentFieldErrors: RegisterErrors = {};
+
+    if (!firstName) {
+      currentFieldErrors.first_name = "First name is required.";
+    }
+
+    if (!lastName) {
+      currentFieldErrors.last_name = "Last name is required.";
+    }
+
+    if (!email) {
+      currentFieldErrors.email = "Email is required.";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      currentFieldErrors.email = "Enter a valid email address.";
+    }
+
+    if (!password) {
+      currentFieldErrors.password = "Password is required.";
+    } else if (password.length < 8) {
+      currentFieldErrors.password = "Password must be at least 8 characters.";
+    }
+
+    if (!passwordConfirmation) {
+      currentFieldErrors.password_confirmation = "Please confirm your password.";
+    } else if (password !== passwordConfirmation) {
+      currentFieldErrors.password_confirmation = "Password confirmation does not match.";
+    }
+
+    if (
+      currentFieldErrors.first_name ||
+      currentFieldErrors.last_name ||
+      currentFieldErrors.email ||
+      currentFieldErrors.password ||
+      currentFieldErrors.password_confirmation
+    ) {
+      setFieldErrors(currentFieldErrors);
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const apiBaseUrl =
+        process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://sass-starter.test";
+      const response = await fetch(`${apiBaseUrl}/api/v1/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          password_confirmation: passwordConfirmation,
+        }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as RegisterResponse | null;
+
+      if (!response.ok) {
+        setFieldErrors({
+          email: payload?.errors?.email?.[0],
+          password: payload?.errors?.password?.[0],
+          password_confirmation: payload?.errors?.password_confirmation?.[0],
+        });
+        setFormError(payload?.message ?? "Unable to register. Please try again.");
+        return;
+      }
+
+      const token = payload?.data?.token;
+
+      if (!token) {
+        setFormError("Registration succeeded but no token was returned.");
+        return;
+      }
+
+      const tokenType = payload?.data?.token_type ?? "Bearer";
+      const serializedUser = payload?.data?.user
+        ? JSON.stringify(payload.data.user)
+        : null;
+      const isSecureContext = window.location.protocol === "https:";
+      const authCookieBase = `auth_token=${encodeURIComponent(token)}; Path=/; SameSite=Lax${
+        isSecureContext ? "; Secure" : ""
+      }`;
+
+      if (isChecked) {
+        localStorage.setItem("auth_token", token);
+        localStorage.setItem("auth_token_type", tokenType);
+
+        if (serializedUser) {
+          localStorage.setItem("auth_user", serializedUser);
+        }
+
+        sessionStorage.removeItem("auth_token");
+        sessionStorage.removeItem("auth_token_type");
+        sessionStorage.removeItem("auth_user");
+        document.cookie = `${authCookieBase}; Max-Age=${60 * 60 * 24 * 30}`;
+      } else {
+        sessionStorage.setItem("auth_token", token);
+        sessionStorage.setItem("auth_token_type", tokenType);
+
+        if (serializedUser) {
+          sessionStorage.setItem("auth_user", serializedUser);
+        }
+
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("auth_token_type");
+        localStorage.removeItem("auth_user");
+        document.cookie = authCookieBase;
+      }
+
+      router.push("/dashboard");
+    } catch {
+      setFormError("Network error while registering. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full overflow-y-auto no-scrollbar">
       <div className="w-full max-w-md sm:pt-10 mx-auto mb-5">
         <Link
-          href="/"
+          href="/dashboard"
           className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
         >
           <ChevronLeftIcon />
@@ -83,8 +260,11 @@ export default function SignUpForm() {
                 </span>
               </div>
             </div>
-            <form>
+            <form onSubmit={handleSubmit}>
               <div className="space-y-5">
+                {formError ? (
+                  <p className="text-sm text-error-500">{formError}</p>
+                ) : null}
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   {/* <!-- First Name --> */}
                   <div className="sm:col-span-1">
@@ -93,9 +273,12 @@ export default function SignUpForm() {
                     </Label>
                     <Input
                       type="text"
-                      id="fname"
-                      name="fname"
+                      id="first_name"
+                      name="first_name"
                       placeholder="Enter your first name"
+                      error={Boolean(fieldErrors.first_name)}
+                      hint={fieldErrors.first_name}
+                      onChange={() => clearFieldError("first_name")}
                     />
                   </div>
                   {/* <!-- Last Name --> */}
@@ -105,9 +288,12 @@ export default function SignUpForm() {
                     </Label>
                     <Input
                       type="text"
-                      id="lname"
-                      name="lname"
+                      id="last_name"
+                      name="last_name"
                       placeholder="Enter your last name"
+                      error={Boolean(fieldErrors.last_name)}
+                      hint={fieldErrors.last_name}
+                      onChange={() => clearFieldError("last_name")}
                     />
                   </div>
                 </div>
@@ -121,6 +307,9 @@ export default function SignUpForm() {
                     id="email"
                     name="email"
                     placeholder="Enter your email"
+                    error={Boolean(fieldErrors.email)}
+                    hint={fieldErrors.email}
+                    onChange={() => clearFieldError("email")}
                   />
                 </div>
                 {/* <!-- Password --> */}
@@ -130,14 +319,47 @@ export default function SignUpForm() {
                   </Label>
                   <div className="relative">
                     <Input
+                      id="password"
+                      name="password"
                       placeholder="Enter your password"
                       type={showPassword ? "text" : "password"}
+                      error={Boolean(fieldErrors.password)}
+                      hint={fieldErrors.password}
+                      onChange={() => clearFieldError("password")}
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
                     >
                       {showPassword ? (
+                        <EyeIcon className="fill-gray-500 dark:fill-gray-400" />
+                      ) : (
+                        <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400" />
+                      )}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <Label>
+                    Confirm Password<span className="text-error-500">*</span>
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="password_confirmation"
+                      name="password_confirmation"
+                      placeholder="Confirm your password"
+                      type={showPasswordConfirmation ? "text" : "password"}
+                      error={Boolean(fieldErrors.password_confirmation)}
+                      hint={fieldErrors.password_confirmation}
+                      onChange={() => clearFieldError("password_confirmation")}
+                    />
+                    <span
+                      onClick={() =>
+                        setShowPasswordConfirmation(!showPasswordConfirmation)
+                      }
+                      className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
+                    >
+                      {showPasswordConfirmation ? (
                         <EyeIcon className="fill-gray-500 dark:fill-gray-400" />
                       ) : (
                         <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400" />
@@ -165,9 +387,9 @@ export default function SignUpForm() {
                 </div>
                 {/* <!-- Button --> */}
                 <div>
-                  <button className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600">
-                    Sign Up
-                  </button>
+                  <Button className="w-full" size="sm" disabled={isSubmitting}>
+                    {isSubmitting ? "Creating account..." : "Sign Up"}
+                  </Button>
                 </div>
               </div>
             </form>
@@ -176,7 +398,7 @@ export default function SignUpForm() {
               <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
                 Already have an account?
                 <Link
-                  href="/signin"
+                  href="/login"
                   className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
                 >
                   Sign In
