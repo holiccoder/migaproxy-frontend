@@ -1,11 +1,5 @@
 import type { Metadata } from "next";
-import { EcommerceMetrics } from "@/components/ecommerce/EcommerceMetrics";
-import React from "react";
-import MonthlyTarget from "@/components/ecommerce/MonthlyTarget";
-import MonthlySalesChart from "@/components/ecommerce/MonthlySalesChart";
-import StatisticsChart from "@/components/ecommerce/StatisticsChart";
-import RecentOrders from "@/components/ecommerce/RecentOrders";
-import DemographicCard from "@/components/ecommerce/DemographicCard";
+import ComponentCard from "@/components/common/ComponentCard";
 
 export const metadata: Metadata = {
   title:
@@ -15,28 +9,25 @@ export const metadata: Metadata = {
 
 export default function Ecommerce() {
   return (
-    <div className="grid grid-cols-12 gap-4 md:gap-6">
-      <div className="col-span-12 space-y-6 xl:col-span-7">
-        <EcommerceMetrics />
+    <div className="space-y-6">
+      <ComponentCard title="My Stats">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]">
+            <p className="text-xs uppercase text-gray-500 dark:text-gray-400">Available Traffic</p>
+            <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">0 GB</p>
+          </div>
 
-        <MonthlySalesChart />
-      </div>
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]">
+            <p className="text-xs uppercase text-gray-500 dark:text-gray-400">Total Traffic Purchased</p>
+            <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">0 GB</p>
+          </div>
 
-      <div className="col-span-12 xl:col-span-5">
-        <MonthlyTarget />
-      </div>
-
-      <div className="col-span-12">
-        <StatisticsChart />
-      </div>
-
-      <div className="col-span-12 xl:col-span-5">
-        <DemographicCard />
-      </div>
-
-      <div className="col-span-12 xl:col-span-7">
-        <RecentOrders />
-      </div>
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]">
+            <p className="text-xs uppercase text-gray-500 dark:text-gray-400">Current Plan</p>
+            <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">Free</p>
+          </div>
+        </div>
+      </ComponentCard>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
+import { EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { FormEvent, useState } from "react";
@@ -28,6 +28,8 @@ type LoginResponse = {
 
 export default function SignInForm() {
   const router = useRouter();
+  const apiBaseUrl =
+    process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://sass-starter.test";
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,7 +91,7 @@ export default function SignInForm() {
           email: payload?.errors?.email?.[0],
           password: payload?.errors?.password?.[0],
         });
-        setFormError(payload?.message ?? "Unable to sign in. Please try again.");
+        setFormError(payload?.message ?? "Unable to login. Please try again.");
         return;
       }
 
@@ -101,6 +103,7 @@ export default function SignInForm() {
       }
 
       const tokenType = payload?.data?.token_type ?? "Bearer";
+      const serializedLoginResponse = payload ? JSON.stringify(payload) : null;
       const serializedUser = payload?.data?.user
         ? JSON.stringify(payload.data.user)
         : null;
@@ -108,6 +111,10 @@ export default function SignInForm() {
       const authCookieBase = `auth_token=${encodeURIComponent(token)}; Path=/; SameSite=Lax${
         isSecureContext ? "; Secure" : ""
       }`;
+
+      if (serializedLoginResponse) {
+        localStorage.setItem("auth_login_response", serializedLoginResponse);
+      }
 
       if (isChecked) {
         localStorage.setItem("auth_token", token);
@@ -145,28 +152,22 @@ export default function SignInForm() {
 
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full">
-      <div className="w-full max-w-md sm:pt-10 mx-auto mb-5">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-        >
-          <ChevronLeftIcon />
-          Back to dashboard
-        </Link>
-      </div>
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div>
           <div className="mb-5 sm:mb-8">
             <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-              Sign In
+              Login
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Enter your email and password to sign in!
+              Enter your email and password to login!
             </p>
           </div>
           <div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
-              <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
+              <a
+                href={`${apiBaseUrl}/api/v1/auth/google/redirect`}
+                className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+              >
                 <svg
                   width="20"
                   height="20"
@@ -191,21 +192,28 @@ export default function SignInForm() {
                     fill="#EB4335"
                   />
                 </svg>
-                Sign in with Google
-              </button>
-              <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
+                Login with Google
+              </a>
+              <a
+                href={`${apiBaseUrl}/api/v1/auth/github/redirect`}
+                className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+              >
                 <svg
-                  width="21"
-                  className="fill-current"
+                  width="20"
                   height="20"
-                  viewBox="0 0 21 20"
+                  viewBox="0 0 20 20"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path d="M15.6705 1.875H18.4272L12.4047 8.75833L19.4897 18.125H13.9422L9.59717 12.4442L4.62554 18.125H1.86721L8.30887 10.7625L1.51221 1.875H7.20054L11.128 7.0675L15.6705 1.875ZM14.703 16.475H16.2305L6.37054 3.43833H4.73137L14.703 16.475Z" />
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M10 1.25C5.16751 1.25 1.25 5.20962 1.25 10.0947C1.25 13.9998 3.75876 17.3136 7.23938 18.4828C7.67751 18.5655 7.83564 18.2907 7.83564 18.0567C7.83564 17.8453 7.82876 17.1286 7.82501 16.3677C5.39688 16.9044 4.88439 15.1834 4.88439 15.1834C4.48814 14.1549 3.91626 13.8816 3.91626 13.8816C3.12439 13.3287 3.97626 13.3407 3.97626 13.3407C4.85251 13.4033 5.31376 14.2558 5.31376 14.2558C6.09251 15.6286 7.35688 15.231 7.85314 15.0015C7.93064 14.4222 8.15751 14.0261 8.40814 13.8024C6.46939 13.5755 4.43126 12.8059 4.43126 9.36614C4.43126 8.38657 4.77689 7.58708 5.34314 6.95735C5.25189 6.73042 4.94689 5.81522 5.42939 4.57416C5.42939 4.57416 6.16439 4.33474 7.83439 5.4938C8.53376 5.29489 9.28376 5.19596 10.0338 5.1922C10.7838 5.19596 11.5338 5.29489 12.2344 5.4938C13.9038 4.33474 14.6375 4.57416 14.6375 4.57416C15.1213 5.81522 14.8163 6.73042 14.725 6.95735C15.2925 7.58708 15.6369 8.38657 15.6369 9.36614C15.6369 12.8152 13.595 13.5725 11.6494 13.7949C11.9638 14.0725 12.2431 14.618 12.2431 15.4524C12.2431 16.6503 12.2325 17.7189 12.2325 18.0567C12.2325 18.2933 12.3894 18.5694 12.8338 18.4815C16.3125 17.3111 18.75 13.9985 18.75 10.0947C18.75 5.20962 14.8325 1.25 10 1.25Z"
+                    fill="currentColor"
+                  />
                 </svg>
-                Sign in with X
-              </button>
+                Login with GitHub
+              </a>
             </div>
             <div className="relative py-3 sm:py-5">
               <div className="absolute inset-0 flex items-center">
@@ -278,7 +286,7 @@ export default function SignInForm() {
                 </div>
                 <div>
                   <Button className="w-full" size="sm" disabled={isSubmitting}>
-                    {isSubmitting ? "Signing in..." : "Sign in"}
+                    {isSubmitting ? "Logging in..." : "Login"}
                   </Button>
                 </div>
               </div>
