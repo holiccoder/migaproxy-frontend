@@ -3,37 +3,9 @@
 import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { Modal } from "@/components/ui/modal";
-import React, { useMemo, useState } from "react";
-
-const locationOptions = [
-  { value: "all", label: "All Locations" },
-  { value: "us", label: "United States" },
-  { value: "gb", label: "United Kingdom" },
-  { value: "de", label: "Germany" },
-  { value: "jp", label: "Japan" },
-];
-
-const proxyFormatOptions = [
-  {
-    value: "server-port-username-password",
-    label: "SERVER:PORT:USERNAME:PASSWORD",
-  },
-  {
-    value: "username-password-server-port",
-    label: "USERNAME:PASSWORD@SERVER:PORT",
-  },
-  {
-    value: "server-port-username-password-pipe",
-    label: "SERVER|PORT|USERNAME|PASSWORD",
-  },
-];
-
-const protocolOptions = ["HTTP", "SOCKS5"] as const;
-const proxyTypeOptions = [
-  "rotating",
-  "sticky(5-30 minutes)",
-  "sticky(1-6 hours)",
-] as const;
+import { ENV } from "@/config/env";
+import { ipmartApi } from "@/utils/api";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 const generatePassword = (): string => {
   const charset = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
@@ -63,6 +35,43 @@ type ChangeProxyPasswordResponse = {
 type StoredProxyCredentials = {
   username: string;
   password: string;
+};
+
+type CountryOption = {
+  code: string;
+  cntry: string;
+  cntry_name?: string;
+  city_name?: string | null;
+  state_name?: string | null;
+  city?: string | null;
+  state?: string | null;
+};
+
+type ProtocolOption = {
+  code: string;
+  desc: string;
+};
+
+type PatternOption = {
+  code: string;
+  desc: string;
+};
+
+type RuleOption = {
+  code: string;
+  desc: string;
+};
+
+type ProxyOptionsResponse = {
+  countries?: CountryOption[];
+  protocols?: ProtocolOption[];
+  patterns?: PatternOption[];
+  rules?: RuleOption[];
+  test_link?: string;
+};
+
+type ProxyOptionsApiResponse = {
+  data?: ProxyOptionsResponse;
 };
 
 const pickStoredString = (...values: unknown[]): string => {
@@ -130,12 +139,14 @@ const getStoredProxyCredentials = (): StoredProxyCredentials => {
 
   return {
     username: pickStoredString(
+      storedUser.proxyName,
       storedUser.proxy_username,
       storedUser.proxy_user,
       storedUser.username,
     ),
     password:
       pickStoredString(
+        storedUser.proxyPwd,
         storedUser.proxy_password,
         storedUser.proxy_pass,
         storedUser.password,
@@ -220,9 +231,14 @@ export default function RotatingResidentialProxiesPage() {
     () => storedProxyCredentials.password,
   );
   const [selectedLocation, setSelectedLocation] = useState("all");
-  const [protocol, setProtocol] = useState<(typeof protocolOptions)[number]>("HTTP");
-  const [proxyType, setProxyType] = useState<(typeof proxyTypeOptions)[number]>("rotating");
-  const [proxyFormat, setProxyFormat] = useState(proxyFormatOptions[0]?.value ?? "");
+  const [protocol, setProtocol] = useState("");
+  const [proxyType, setProxyType] = useState("");
+  const [proxyFormat, setProxyFormat] = useState("");
+  const [protocolOptions, setProtocolOptions] = useState<{ value: string; label: string }[]>([]);
+  const [proxyTypeOptions, setProxyTypeOptions] = useState<{ value: string; label: string }[]>([]);
+  const [proxyFormatOptions, setProxyFormatOptions] = useState<{ value: string; label: string }[]>([]);
+  const [countryOptions, setCountryOptions] = useState<{ value: string; label: string }[]>([]);
+  const [userBalance, setUserBalance] = useState<number>(0);
   const [isCopied, setIsCopied] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -230,11 +246,56 @@ export default function RotatingResidentialProxiesPage() {
   const [passwordUpdateError, setPasswordUpdateError] = useState<string | null>(null);
   const [passwordUpdateSuccess, setPasswordUpdateSuccess] = useState<string | null>(null);
 
-  const apiBaseUrl = useMemo(() => {
-    return process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://sass-starter.test";
+  const fetchProxyOptions = useCallback(async () => {
+    const token = getAuthToken();
+    try {
+      const response = await ipmartApi.getProxyOptions(token ?? undefined) as unknown as ProxyOptionsApiResponse;
+      const rawData = response.data as { data?: ProxyOptionsResponse } | undefined;
+      const data = rawData?.data as ProxyOptionsResponse | undefined;
+      if (data) {
+        if (data.protocols && data.protocols.length > 0) {
+          const mappedProtocols = data.protocols.map(p => ({ value: p.code, label: p.desc }));
+          setProtocolOptions(mappedProtocols);
+          setProtocol(mappedProtocols[0].value);
+        }
+        if (data.rules && data.rules.length > 0) {
+          const mappedTypes = data.rules.map(r => ({ value: r.code, label: r.desc }));
+          setProxyTypeOptions(mappedTypes);
+          setProxyType(mappedTypes[0].value);
+        }
+        if (data.patterns && data.patterns.length > 0) {
+          const mappedFormats = data.patterns.map(p => ({ value: p.code, label: p.desc }));
+          setProxyFormatOptions(mappedFormats);
+          setProxyFormat(mappedFormats[0].value);
+        }
+        if (data.countries && data.countries.length > 0) {
+          const mappedCountries = data.countries.map(c => ({ value: c.code, label: c.cntry }));
+          setCountryOptions(mappedCountries);
+        }
+      }
+    } catch {
+      // handle error silently
+    }
   }, []);
 
+  const fetchUserBalance = useCallback(() => {
+    const storedUser = getStoredLoginResponseUser();
+    if (storedUser && typeof storedUser.balance === "number") {
+      setUserBalance(storedUser.balance);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchProxyOptions();
+    void fetchUserBalance();
+  }, [fetchProxyOptions, fetchUserBalance]);
+
+  const apiBaseUrl = ENV.API_BASE_URL;
+
   const testCommand = useMemo(() => {
+    if (userBalance === 0) {
+      return "";
+    }
     const locationValue = selectedLocation || "all";
     const userValue = proxyUsername || "username";
     const passwordValue = proxyPassword || "password";
@@ -243,7 +304,7 @@ export default function RotatingResidentialProxiesPage() {
     return `curl -x ${scheme}://gateway.example.com:10000 -U ${userValue}:${passwordValue} "https://ipinfo.io?location=${locationValue}&type=${encodeURIComponent(
       proxyType
     )}&format=${proxyFormat}"`;
-  }, [selectedLocation, proxyUsername, proxyPassword, protocol, proxyType, proxyFormat]);
+  }, [selectedLocation, proxyUsername, proxyPassword, protocol, proxyType, proxyFormat, userBalance]);
 
   const handleCopyCommand = async (): Promise<void> => {
     try {
@@ -258,7 +319,7 @@ export default function RotatingResidentialProxiesPage() {
   const openPasswordModal = (): void => {
     setPasswordUpdateError(null);
     setPasswordUpdateSuccess(null);
-    setNewPassword(generatePassword());
+    setNewPassword("");
     setIsPasswordModalOpen(true);
   };
 
@@ -411,7 +472,8 @@ export default function RotatingResidentialProxiesPage() {
               onChange={(event) => setSelectedLocation(event.target.value)}
               className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-10 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
             >
-              {locationOptions.map((option) => (
+              <option value="all">All Locations</option>
+              {countryOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -426,16 +488,16 @@ export default function RotatingResidentialProxiesPage() {
             <div className="flex flex-wrap gap-2">
               {protocolOptions.map((protocolOption) => (
                 <button
-                  key={protocolOption}
+                  key={protocolOption.value}
                   type="button"
-                  onClick={() => setProtocol(protocolOption)}
+                  onClick={() => setProtocol(protocolOption.value)}
                   className={`inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-medium ${
-                    protocol === protocolOption
+                    protocol === protocolOption.value
                       ? "bg-brand-500 text-white"
                       : "border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
                   }`}
                 >
-                  {protocolOption}
+                  {protocolOption.label}
                 </button>
               ))}
             </div>
@@ -448,16 +510,16 @@ export default function RotatingResidentialProxiesPage() {
             <div className="flex flex-wrap gap-2">
               {proxyTypeOptions.map((proxyTypeOption) => (
                 <button
-                  key={proxyTypeOption}
+                  key={proxyTypeOption.value}
                   type="button"
-                  onClick={() => setProxyType(proxyTypeOption)}
+                  onClick={() => setProxyType(proxyTypeOption.value)}
                   className={`inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-medium capitalize ${
-                    proxyType === proxyTypeOption
+                    proxyType === proxyTypeOption.value
                       ? "bg-brand-500 text-white"
                       : "border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
                   }`}
                 >
-                  {proxyTypeOption}
+                  {proxyTypeOption.label}
                 </button>
               ))}
             </div>
@@ -467,17 +529,22 @@ export default function RotatingResidentialProxiesPage() {
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
               proxy format
             </label>
-            <select
-              value={proxyFormat}
-              onChange={(event) => setProxyFormat(event.target.value)}
-              className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-10 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
-            >
-              {proxyFormatOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
+            <div className="flex flex-wrap gap-2">
+              {proxyFormatOptions.map((formatOption) => (
+                <button
+                  key={formatOption.value}
+                  type="button"
+                  onClick={() => setProxyFormat(formatOption.value)}
+                  className={`inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-medium ${
+                    proxyFormat === formatOption.value
+                      ? "bg-brand-500 text-white"
+                      : "border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
+                  }`}
+                >
+                  {formatOption.label}
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
           <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
@@ -516,6 +583,23 @@ export default function RotatingResidentialProxiesPage() {
           <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90">
             Change Proxy Password
           </h4>
+
+          <div>
+            <label
+              htmlFor="current-proxy-password"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Current password
+            </label>
+            <input
+              id="current-proxy-password"
+              type="text"
+              value={proxyPassword}
+              readOnly
+              disabled
+              className="h-11 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:outline-hidden dark:border-gray-700 dark:bg-gray-800 dark:text-white/90"
+            />
+          </div>
 
           <div>
             <label
