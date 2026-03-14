@@ -3,6 +3,7 @@ import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
+import { ENV } from "@/config/env";
 import { EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,8 +29,7 @@ type LoginResponse = {
 
 export default function SignInForm() {
   const router = useRouter();
-  const apiBaseUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://sass-starter.test";
+  const apiBaseUrl = ENV.API_BASE_URL;
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -73,8 +73,7 @@ export default function SignInForm() {
     }
 
     try {
-      const apiBaseUrl =
-        process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://sass-starter.test";
+      const apiBaseUrl = ENV.API_BASE_URL;
       const response = await fetch(`${apiBaseUrl}/api/v1/login`, {
         method: "POST",
         headers: {
@@ -142,7 +141,7 @@ export default function SignInForm() {
         document.cookie = authCookieBase;
       }
 
-      router.push("/dashboard");
+      router.push("/user/dashboard");
     } catch {
       setFormError("Network error while signing in. Please try again.");
     } finally {

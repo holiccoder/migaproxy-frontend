@@ -1,18 +1,138 @@
 "use client";
-import React from "react";
+
+import { ENV } from "@/config/env";
+import React, { ChangeEvent, FormEvent, useMemo, useState } from "react";
 import { useModal } from "../../hooks/useModal";
+import { splitName, useAuthUser } from "../../hooks/useAuthUser";
 import { Modal } from "../ui/modal";
-import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving changes...");
-    closeModal();
+  const { user } = useAuthUser();
+  const { firstName, lastName } = splitName(user?.name);
+  const email = user?.email ?? "";
+  const skypeProfile = user?.skype_profile ?? "";
+  const telegramProfile = user?.telegram_profile ?? "";
+  const facebookProfile = user?.facebook_profile ?? "";
+  const xProfile = user?.x_profile ?? "";
+  const youtubeProfile = user?.youtube_profile ?? "";
+  const instagramProfile = user?.instagram_profile ?? "";
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const profileAvatar = useMemo(() => {
+    return avatarPreview ?? user?.avatar_url ?? "/images/user/owner.jpg";
+  }, [avatarPreview, user?.avatar_url]);
+
+  const getAuthToken = (): string | null => {
+    const localToken = localStorage.getItem("auth_token");
+
+    if (localToken) {
+      return localToken;
+    }
+
+    const sessionToken = sessionStorage.getItem("auth_token");
+
+    if (sessionToken) {
+      return sessionToken;
+    }
+
+    const authCookie = document.cookie
+      .split("; ")
+      .find((cookie) => cookie.startsWith("auth_token="));
+
+    if (!authCookie) {
+      return null;
+    }
+
+    const [, cookieValue = ""] = authCookie.split("=");
+    return decodeURIComponent(cookieValue);
   };
+
+  const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    const selectedFile = event.target.files?.[0] ?? null;
+    setAvatarFile(selectedFile);
+
+    if (!selectedFile) {
+      setAvatarPreview(null);
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(selectedFile);
+    setAvatarPreview(previewUrl);
+  };
+
+  const handleSave = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+
+    const token = getAuthToken();
+
+    if (!token) {
+      setFormError("You are not authenticated.");
+      return;
+    }
+
+    setIsSaving(true);
+    setFormError(null);
+
+    try {
+      const formData = new FormData(event.currentTarget);
+      const apiBaseUrl = ENV.API_BASE_URL;
+
+      if (avatarFile) {
+        formData.set("avatar", avatarFile);
+      }
+
+      const response = await fetch(`${apiBaseUrl}/api/v1/profile`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | {
+            message?: string;
+            data?: {
+              user?: {
+                avatar_url?: string | null;
+                skype_profile?: string | null;
+                telegram_profile?: string | null;
+                facebook_profile?: string | null;
+                x_profile?: string | null;
+                youtube_profile?: string | null;
+                instagram_profile?: string | null;
+              };
+            };
+          }
+        | null;
+
+      if (!response.ok) {
+        setFormError(payload?.message ?? "Unable to save profile changes.");
+        return;
+      }
+
+      if (payload?.data?.user?.avatar_url) {
+        setAvatarPreview(payload.data.user.avatar_url);
+      } else {
+        setAvatarPreview(null);
+      }
+
+      window.dispatchEvent(new Event("profile-updated"));
+      closeModal();
+    } catch {
+      setFormError("Unable to save profile changes.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -27,7 +147,7 @@ export default function UserInfoCard() {
                 First Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Musharof
+                {firstName || "-"}
               </p>
             </div>
 
@@ -36,7 +156,7 @@ export default function UserInfoCard() {
                 Last Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Chowdhury
+                {lastName || "-"}
               </p>
             </div>
 
@@ -45,25 +165,61 @@ export default function UserInfoCard() {
                 Email address
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                randomuser@pimjo.com
+                {email || "-"}
               </p>
             </div>
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Phone
+                Skype
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                +09 363 398 46
+                {skypeProfile || "-"}
               </p>
             </div>
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Bio
+                Telegram
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Team Manager
+                {telegramProfile || "-"}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                Facebook
+              </p>
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                {facebookProfile || "-"}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                X
+              </p>
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                {xProfile || "-"}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                YouTube
+              </p>
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                {youtubeProfile || "-"}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                Instagram
+              </p>
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                {instagramProfile || "-"}
               </p>
             </div>
           </div>
@@ -102,45 +258,33 @@ export default function UserInfoCard() {
               Update your details to keep your profile up-to-date.
             </p>
           </div>
-          <form className="flex flex-col">
+          <form className="flex flex-col" onSubmit={handleSave}>
             <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
-              <div>
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Social Links
-                </h5>
+              {formError ? (
+                <p className="mb-4 text-sm text-error-500">{formError}</p>
+              ) : null}
 
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div>
-                    <Label>Facebook</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://www.facebook.com/PimjoHQ"
+              <div className="mb-7">
+                <Label>Avatar</Label>
+                <div className="mt-3 flex items-center gap-4">
+                  <div className="h-20 w-20 overflow-hidden rounded-full border border-gray-200 dark:border-gray-800">
+                    <img
+                      src={profileAvatar}
+                      alt="Avatar"
+                      className="h-full w-full object-cover"
                     />
                   </div>
-
-                  <div>
-                    <Label>X.com</Label>
-                    <Input type="text" defaultValue="https://x.com/PimjoHQ" />
-                  </div>
-
-                  <div>
-                    <Label>Linkedin</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://www.linkedin.com/company/pimjo"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Instagram</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://instagram.com/PimjoHQ"
-                    />
-                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    name="avatar"
+                    onChange={handleAvatarChange}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-brand-500 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-brand-600 dark:text-gray-400"
+                  />
                 </div>
               </div>
-              <div className="mt-7">
+
+              <div>
                 <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
                   Personal Information
                 </h5>
@@ -148,38 +292,112 @@ export default function UserInfoCard() {
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
                     <Label>First Name</Label>
-                    <Input type="text" defaultValue="Musharof" />
+                    <Input
+                      key={`first-name-${firstName}`}
+                      name="first_name"
+                      type="text"
+                      defaultValue={firstName}
+                    />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Last Name</Label>
-                    <Input type="text" defaultValue="Chowdhury" />
+                    <Input
+                      key={`last-name-${lastName}`}
+                      name="last_name"
+                      type="text"
+                      defaultValue={lastName}
+                    />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Email Address</Label>
-                    <Input type="text" defaultValue="randomuser@pimjo.com" />
+                    <Input
+                      key={`email-${email}`}
+                      name="email"
+                      type="email"
+                      defaultValue={email}
+                    />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
-                    <Label>Phone</Label>
-                    <Input type="text" defaultValue="+09 363 398 46" />
+                    <Label>Skype</Label>
+                    <Input
+                      key={`skype-profile-${skypeProfile}`}
+                      name="skype_profile"
+                      type="text"
+                      defaultValue={skypeProfile}
+                    />
                   </div>
 
-                  <div className="col-span-2">
-                    <Label>Bio</Label>
-                    <Input type="text" defaultValue="Team Manager" />
+                  <div className="col-span-2 lg:col-span-1">
+                    <Label>Telegram</Label>
+                    <Input
+                      key={`telegram-profile-${telegramProfile}`}
+                      name="telegram_profile"
+                      type="text"
+                      defaultValue={telegramProfile}
+                    />
+                  </div>
+
+                  <div className="col-span-2 lg:col-span-1">
+                    <Label>Facebook</Label>
+                    <Input
+                      key={`facebook-profile-${facebookProfile}`}
+                      name="facebook_profile"
+                      type="text"
+                      defaultValue={facebookProfile}
+                    />
+                  </div>
+
+                  <div className="col-span-2 lg:col-span-1">
+                    <Label>X</Label>
+                    <Input
+                      key={`x-profile-${xProfile}`}
+                      name="x_profile"
+                      type="text"
+                      defaultValue={xProfile}
+                    />
+                  </div>
+
+                  <div className="col-span-2 lg:col-span-1">
+                    <Label>YouTube</Label>
+                    <Input
+                      key={`youtube-profile-${youtubeProfile}`}
+                      name="youtube_profile"
+                      type="text"
+                      defaultValue={youtubeProfile}
+                    />
+                  </div>
+
+                  <div className="col-span-2 lg:col-span-1">
+                    <Label>Instagram</Label>
+                    <Input
+                      key={`instagram-profile-${instagramProfile}`}
+                      name="instagram_profile"
+                      type="text"
+                      defaultValue={instagramProfile}
+                    />
                   </div>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" variant="outline" onClick={closeModal}>
+              <button
+                type="button"
+                onClick={closeModal}
+                disabled={isSaving}
+                className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300"
+              >
                 Close
-              </Button>
-              <Button size="sm" onClick={handleSave}>
-                Save Changes
-              </Button>
+              </button>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isSaving ? "Saving..." : "Save Changes"}
+              </button>
             </div>
           </form>
         </div>

@@ -2,7 +2,8 @@
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import PricingPlanCard from "@/components/common/PricingPlanCard";
-import React, { useEffect, useMemo, useState } from "react";
+import { ENV } from "@/config/env";
+import React, { useEffect, useState } from "react";
 
 type Plan = {
   id?: number | string | null;
@@ -288,9 +289,7 @@ export default function PricingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const apiBaseUrl = useMemo(() => {
-    return process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://sass-starter.test";
-  }, []);
+  const apiBaseUrl = ENV.API_BASE_URL;
 
   useEffect(() => {
     const fetchPlans = async (): Promise<void> => {
@@ -348,7 +347,7 @@ export default function PricingPage() {
             description: rawDescription || "暂无套餐描述。",
             features: normalizeFeatures(featuresSource),
             purchaseHref: planId
-              ? `/orders/purchase/${encodeURIComponent(planId)}`
+              ? `/user/orders/purchase/${encodeURIComponent(planId)}`
               : null,
           };
         });

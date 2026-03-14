@@ -231,6 +231,8 @@ export default function RotatingResidentialProxiesPage() {
     () => storedProxyCredentials.password,
   );
   const [selectedLocation, setSelectedLocation] = useState("all");
+  const [selectedState, setSelectedState] = useState("all");
+  const [selectedCity, setSelectedCity] = useState("all");
   const [protocol, setProtocol] = useState("");
   const [proxyType, setProxyType] = useState("");
   const [proxyFormat, setProxyFormat] = useState("");
@@ -238,6 +240,10 @@ export default function RotatingResidentialProxiesPage() {
   const [proxyTypeOptions, setProxyTypeOptions] = useState<{ value: string; label: string }[]>([]);
   const [proxyFormatOptions, setProxyFormatOptions] = useState<{ value: string; label: string }[]>([]);
   const [countryOptions, setCountryOptions] = useState<{ value: string; label: string }[]>([]);
+  const [stateOptions, setStateOptions] = useState<{ value: string; label: string }[]>([]);
+  const [cityOptions, setCityOptions] = useState<{ value: string; label: string }[]>([]);
+  const [loadingStates, setLoadingStates] = useState(false);
+  const [loadingCities, setLoadingCities] = useState(false);
   const [userBalance, setUserBalance] = useState<number>(0);
   const [isCopied, setIsCopied] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -282,6 +288,50 @@ export default function RotatingResidentialProxiesPage() {
     const storedUser = getStoredLoginResponseUser();
     if (storedUser && typeof storedUser.balance === "number") {
       setUserBalance(storedUser.balance);
+    }
+  }, []);
+
+  const fetchStates = useCallback(async (countryCode: string) => {
+    const token = getAuthToken();
+    setLoadingStates(true);
+    try {
+      const response = await ipmartApi.getProxyStates(countryCode, token ?? undefined);
+      const raw = response.data as any;
+      const states: any[] = raw?.data?.states ?? raw?.data ?? raw?.states ?? (Array.isArray(raw) ? raw : []);
+      if (Array.isArray(states) && states.length > 0) {
+        setStateOptions(states.map((s: any) => ({
+          value: s.state ?? s.code ?? s.state_name ?? "",
+          label: s.state_name ?? s.state ?? s.name ?? "",
+        })));
+      } else {
+        setStateOptions([]);
+      }
+    } catch {
+      setStateOptions([]);
+    } finally {
+      setLoadingStates(false);
+    }
+  }, []);
+
+  const fetchCities = useCallback(async (countryCode: string, state: string) => {
+    const token = getAuthToken();
+    setLoadingCities(true);
+    try {
+      const response = await ipmartApi.getProxyCities(countryCode, state, token ?? undefined);
+      const raw = response.data as any;
+      const cities: any[] = raw?.data?.cities ?? raw?.data ?? raw?.cities ?? (Array.isArray(raw) ? raw : []);
+      if (Array.isArray(cities) && cities.length > 0) {
+        setCityOptions(cities.map((c: any) => ({
+          value: c.city ?? c.code ?? c.city_name ?? "",
+          label: c.city_name ?? c.city ?? c.name ?? "",
+        })));
+      } else {
+        setCityOptions([]);
+      }
+    } catch {
+      setCityOptions([]);
+    } finally {
+      setLoadingCities(false);
     }
   }, []);
 
@@ -467,18 +517,64 @@ export default function RotatingResidentialProxiesPage() {
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
               select location
             </label>
-            <select
-              value={selectedLocation}
-              onChange={(event) => setSelectedLocation(event.target.value)}
-              className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-10 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
-            >
-              <option value="all">All Locations</option>
-              {countryOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+              <select
+                value={selectedLocation}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setSelectedLocation(value);
+                  setSelectedState("all");
+                  setSelectedCity("all");
+                  setStateOptions([]);
+                  setCityOptions([]);
+                  if (value !== "all") {
+                    void fetchStates(value);
+                  }
+                }}
+                className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-10 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+              >
+                <option value="all">All Locations</option>
+                {countryOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={selectedState}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setSelectedState(value);
+                  setSelectedCity("all");
+                  setCityOptions([]);
+                  if (value !== "all" && selectedLocation !== "all") {
+                    void fetchCities(selectedLocation, value);
+                  }
+                }}
+                disabled={selectedLocation === "all" || loadingStates}
+                className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-10 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="all">{loadingStates ? "Loading..." : "All States"}</option>
+                {stateOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={selectedCity}
+                onChange={(event) => setSelectedCity(event.target.value)}
+                disabled={selectedState === "all" || loadingCities}
+                className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-10 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="all">{loadingCities ? "Loading..." : "All Cities"}</option>
+                {cityOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">

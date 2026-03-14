@@ -1,4 +1,3 @@
-import Calendar from "@/components/calendar/Calendar";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { Metadata } from "next";
 import React from "react";
@@ -13,7 +12,9 @@ export default function page() {
   return (
     <div>
       <PageBreadcrumb pageTitle="Calendar" />
-      <Calendar />
+      <div className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300">
+        Calendar module has been removed.
+      </div>
     </div>
   );
 }

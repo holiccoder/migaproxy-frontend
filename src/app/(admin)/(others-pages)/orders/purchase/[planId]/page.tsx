@@ -1,6 +1,7 @@
 "use client";
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import { ENV } from "@/config/env";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -76,9 +77,7 @@ export default function PlaceOrderPage() {
   const [isPlacingOrder, setIsPlacingOrder] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const apiBaseUrl = useMemo(() => {
-    return process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://sass-starter.test";
-  }, []);
+  const apiBaseUrl = ENV.API_BASE_URL;
 
   const planId = useMemo(() => {
     const rawPlanId = params?.planId;
@@ -109,7 +108,7 @@ export default function PlaceOrderPage() {
       const token = getAuthToken();
 
       if (!token) {
-        const redirectPath = `/orders/purchase/${encodeURIComponent(normalizedPlanId)}`;
+        const redirectPath = `/user/orders/purchase/${encodeURIComponent(normalizedPlanId)}`;
         const loginParams = new URLSearchParams({ redirect: redirectPath });
         router.replace(`/login?${loginParams.toString()}`);
         return;
@@ -153,7 +152,7 @@ export default function PlaceOrderPage() {
           return;
         }
 
-        router.replace("/orders");
+        router.replace("/user/orders");
       } catch {
         setErrorMessage("Unable to place order.");
         setIsPlacingOrder(false);
@@ -178,7 +177,7 @@ export default function PlaceOrderPage() {
           <div className="space-y-4">
             <p className="text-sm text-error-500">{errorMessage}</p>
             <Link
-              href="/pricing"
+              href="/user/pricing"
               className="inline-flex items-center rounded-lg bg-teal-900 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
             >
               Back to Pricing

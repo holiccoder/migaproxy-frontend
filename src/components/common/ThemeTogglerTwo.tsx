@@ -1,9 +1,12 @@
 "use client";
-import { useTheme } from "@/context/ThemeContext";
 import React from "react";
 
 export default function ThemeTogglerTwo() {
-  const { toggleTheme } = useTheme();
+  const toggleTheme = (): void => {
+    const isDark = document.documentElement.classList.toggle("dark");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  };
+
   return (
     <button
       onClick={toggleTheme}

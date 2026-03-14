@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { ENV } from "@/config/env";
 
 type AuthUser = {
   id: number | string;
@@ -236,8 +237,7 @@ export const useAuthUser = (): UseAuthUserResult => {
 
     try {
       setErrorMessage(null);
-      const apiBaseUrl =
-        process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://sass-starter.test";
+      const apiBaseUrl = ENV.API_BASE_URL;
       const response = await fetch(`${apiBaseUrl}/api/user`, {
         method: "GET",
         headers: {
