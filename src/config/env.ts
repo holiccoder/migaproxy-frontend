@@ -1,5 +1,5 @@
-const DEFAULT_BASE_URL = "http://localhost:4002";
-const DEFAULT_API_BASE_URL = "http://localhost:8001";
+const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.trim() || "http://localhost:4002";
+const DEFAULT_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "http://localhost:8001";
 
 const trimTrailingSlashes = (value: string): string => {
   return value.replace(/\/+$/, "");
