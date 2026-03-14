@@ -22,9 +22,16 @@ const apiStorageRemotePattern = {
   pathname: "/storage/**",
 };
 
+const blogStorageRemotePattern = {
+  protocol: "https" as const,
+  hostname: "sass-starter.test",
+  port: undefined,
+  pathname: "/storage/**",
+};
+
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [apiStorageRemotePattern],
+    remotePatterns: [apiStorageRemotePattern, blogStorageRemotePattern],
   },
 
   webpack(config) {

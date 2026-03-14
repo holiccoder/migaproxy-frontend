@@ -1,7 +1,7 @@
 "use client";
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import { ENV } from "@/config/env";
+import { BLOG_POSTS_API_ENDPOINT, toBlogImageUrl } from "@/lib/blog-endpoints";
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 
@@ -36,7 +36,6 @@ export default function BlogPage() {
         setIsLoading(true);
         setErrorMessage(null);
 
-        const apiBaseUrl = ENV.API_BASE_URL;
         const searchParams = new URLSearchParams();
 
         if (searchQuery.trim()) {
@@ -44,13 +43,13 @@ export default function BlogPage() {
         }
 
         const response = await fetch(
-          `${apiBaseUrl}/api/v1/posts${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
+          `${BLOG_POSTS_API_ENDPOINT}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
           {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
           },
-        }
         );
 
         if (!response.ok) {
@@ -69,20 +68,6 @@ export default function BlogPage() {
 
     void fetchPosts();
   }, [searchQuery]);
-
-  const getCoverImageUrl = (coverImagePath: string | null): string | null => {
-    if (!coverImagePath) {
-      return null;
-    }
-
-    if (coverImagePath.startsWith("http://") || coverImagePath.startsWith("https://")) {
-      return coverImagePath;
-    }
-
-    const apiBaseUrl = ENV.API_BASE_URL;
-
-    return `${apiBaseUrl}/storage/${coverImagePath}`;
-  };
 
   const formatDate = (publishedAt: string | null): string => {
     if (!publishedAt) {
@@ -214,7 +199,7 @@ export default function BlogPage() {
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 xl:grid-cols-4">
             {visiblePosts.map((post) => {
-              const coverImageUrl = getCoverImageUrl(post.cover_image_path);
+              const coverImageUrl = toBlogImageUrl(post.cover_image_path);
               const categoryTitle = post.categories?.[0]?.name ?? "General";
 
               return (

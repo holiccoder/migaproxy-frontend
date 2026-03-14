@@ -17,7 +17,8 @@ export default function MonthlyTarget() {
   const options: ApexOptions = {
     colors: ["#465FFF"],
     chart: {
-      fontFamily: "Outfit, sans-serif",
+      fontFamily:
+        "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       type: "radialBar",
       height: 330,
       sparkline: {

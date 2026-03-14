@@ -1,14 +1,8 @@
 import React from "react"
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 
 import './globals.css'
 import { ThemeProvider } from '@/components/frontend/theme-provider'
-
-const inter = Inter({ 
-  subsets: ['latin'],
-  variable: '--font-inter'
-})
 
 export const metadata: Metadata = {
   title: 'GoProxy | Quality & Affordable Proxies | Residential & Rotating',
@@ -21,7 +15,7 @@ export default function FrontendLayout({
   children: React.ReactNode
 }>) {
   return (
-    <div className={`${inter.variable} font-sans antialiased`}>
+    <div className="font-sans antialiased">
       <ThemeProvider 
         attribute="class" 
         value={{ light: 'light', dark: 'dark' }}

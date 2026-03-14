@@ -3,6 +3,7 @@ import { Header } from "@/components/frontend/header"
 import { Footer } from "@/components/frontend/footer"
 import { BlogDetail } from "@/components/frontend/blog/blog-detail"
 import { apiGet } from "@/lib/api"
+import { BLOG_POSTS_API_ENDPOINT } from "@/lib/blog-endpoints"
 import { notFound } from "next/navigation"
 
 type BlogDetailPageProps = {
@@ -45,7 +46,7 @@ const toContentHtml = (value: string | null): string => {
 export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   const { slug } = await params
   const response = await apiGet<BlogDetailResponse>(
-    `v1/posts/${encodeURIComponent(slug)}`,
+    `${BLOG_POSTS_API_ENDPOINT}/${encodeURIComponent(slug)}`,
   ).catch(() => null)
 
   if (!response?.data) {

@@ -1,9 +1,9 @@
 import Link from "next/link"
 import Image from "next/image"
 import { type BlogPost } from "@/components/frontend/blog-cards"
-import { ENV } from "@/config/env"
 import { Button } from "@/components/frontend/ui/button"
 import { apiGet } from "@/lib/api"
+import { BLOG_POSTS_API_ENDPOINT, toBlogImageUrl } from "@/lib/blog-endpoints"
 
 type ApiBlogPost = {
   id: number
@@ -24,24 +24,12 @@ type BlogPostsResponse = {
 
 const fallbackImage = "/images/blog/proxy-types.jpg"
 
-const toImageUrl = (coverImagePath: string | null): string | null => {
-  if (!coverImagePath) {
-    return null
-  }
-
-  if (coverImagePath.startsWith("http://") || coverImagePath.startsWith("https://")) {
-    return coverImagePath
-  }
-
-  return `${ENV.API_BASE_URL}/storage/${coverImagePath.replace(/^\/+/, "")}`
-}
-
 const toBlogPost = (post: ApiBlogPost): BlogPost => ({
   id: post.id,
   title: post.title,
   slug: post.slug,
   seo_description: post.excerpt ?? post.seo?.description ?? "",
-  featured_image: toImageUrl(post.cover_image_path),
+  featured_image: toBlogImageUrl(post.cover_image_path),
   published_at: post.published_at ?? post.created_at ?? new Date().toISOString(),
 })
 
@@ -49,7 +37,7 @@ export async function LatestBlogPostsSection() {
   let posts: BlogPost[] = []
 
   try {
-    const response = await apiGet<BlogPostsResponse>("v1/posts?per_page=4&page=1")
+    const response = await apiGet<BlogPostsResponse>(`${BLOG_POSTS_API_ENDPOINT}?per_page=4&page=1`)
     posts = (response.data ?? []).map(toBlogPost)
   } catch {
     posts = []

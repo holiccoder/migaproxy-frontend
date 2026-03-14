@@ -1,13 +1,8 @@
 import type { Metadata } from 'next';
-import { Outfit } from 'next/font/google';
 import './globals.css';
 import "flatpickr/dist/flatpickr.css";
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ENV } from '@/config/env';
-
-const outfit = Outfit({
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   robots: ENV.ALLOW_SEARCH_ENGINE_SPIDERS
@@ -35,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${outfit.className} dark:bg-gray-900`}>
+      <body className="dark:bg-gray-900">
         <SidebarProvider>{children}</SidebarProvider>
       </body>
     </html>

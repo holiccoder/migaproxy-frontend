@@ -4,8 +4,10 @@ import { Footer } from "@/components/frontend/footer"
 import { BlogCards, type BlogPost } from "@/components/frontend/blog-cards"
 import { PillButtons } from "@/components/frontend/pill-buttons"
 import { BlogPagination } from "@/components/frontend/blog-pagination"
-import { ENV } from "@/config/env"
 import { apiGet } from "@/lib/api"
+import { BLOG_POSTS_API_ENDPOINT, toBlogImageUrl } from "@/lib/blog-endpoints"
+
+export const dynamic = "force-dynamic"
 
 type ApiBlogPost = {
   id: number
@@ -28,37 +30,41 @@ type BlogPostsResponse = {
   }
 }
 
-const toImageUrl = (coverImagePath: string | null): string | null => {
-  if (!coverImagePath) {
-    return null
-  }
-
-  if (coverImagePath.startsWith("http://") || coverImagePath.startsWith("https://")) {
-    return coverImagePath
-  }
-
-  return `${ENV.API_BASE_URL}/storage/${coverImagePath.replace(/^\/+/, "")}`
-}
-
 const toBlogPost = (post: ApiBlogPost): BlogPost => ({
   id: post.id,
   title: post.title,
   slug: post.slug,
   seo_description: post.excerpt ?? post.seo?.description ?? "",
-  featured_image: toImageUrl(post.cover_image_path),
+  featured_image: toBlogImageUrl(post.cover_image_path),
   published_at: post.published_at ?? post.created_at ?? new Date().toISOString(),
 })
 
 type BlogPageProps = {
-  searchParams?: { page?: string; per_page?: string }
+  searchParams?: Promise<{ page?: string; per_page?: string }>
 }
 
 export default async function BlogPage({ searchParams }: BlogPageProps) {
-  const page = Number(searchParams?.page ?? "1") || 1
-  const perPage = Number(searchParams?.per_page ?? "9") || 9
-  const response = await apiGet<BlogPostsResponse>(
-    `v1/posts?per_page=${perPage}&page=${page}`,
-  )
+  const resolvedSearchParams = await searchParams
+  const page = Number(resolvedSearchParams?.page ?? "1") || 1
+  const perPage = Number(resolvedSearchParams?.per_page ?? "9") || 9
+
+  let hasFetchError = false
+  let response: BlogPostsResponse = {
+    data: [],
+    meta: {
+      current_page: page,
+      last_page: page,
+    },
+  }
+
+  try {
+    response = await apiGet<BlogPostsResponse>(
+      `${BLOG_POSTS_API_ENDPOINT}?per_page=${perPage}&page=${page}`,
+    )
+  } catch {
+    hasFetchError = true
+  }
+
   const posts = (response.data ?? []).map(toBlogPost)
 
   return (
@@ -109,6 +115,11 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           <div className="mb-8 flex justify-center">
             <PillButtons />
           </div>
+          {hasFetchError ? (
+            <p className="mb-8 text-center text-sm text-muted-foreground">
+              Blog posts are temporarily unavailable. Please try again soon.
+            </p>
+          ) : null}
           <BlogCards posts={posts} />
           <div className="mt-10">
             <BlogPagination

@@ -13,7 +13,8 @@ export default function BarChartOne() {
   const options: ApexOptions = {
     colors: ["#465fff"],
     chart: {
-      fontFamily: "Outfit, sans-serif",
+      fontFamily:
+        "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       type: "bar",
       height: 180,
       toolbar: {
@@ -62,7 +63,8 @@ export default function BarChartOne() {
       show: true,
       position: "top",
       horizontalAlign: "left",
-      fontFamily: "Outfit",
+      fontFamily:
+        "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     },
     yaxis: {
       title: {
