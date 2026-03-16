@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Facebook, Twitter, Linkedin, Youtube } from "lucide-react"
+import BrandLogo from "@/components/common/BrandLogo"
 
 const footerLinks = {
   Products: [
@@ -26,8 +27,8 @@ const footerLinks = {
   Company: [
     { label: "About Us", href: "#" },
     { label: "Contact", href: "#" },
-    { label: "Privacy Policy", href: "#" },
-    { label: "Terms of Service", href: "#" },
+    { label: "Privacy Policy", href: "/privacy-policy" },
+    { label: "Terms and Conditions", href: "/terms-and-conditions" },
     { label: "Refund Policy", href: "#" },
   ],
 }
@@ -47,11 +48,12 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
           {/* Logo & Description */}
           <div className="col-span-2 md:col-span-3 lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">G</span>
-              </div>
-              <span className="text-xl font-bold text-foreground">GoProxy</span>
+            <Link href="/" className="mb-4 inline-flex items-center">
+              <BrandLogo
+                width={154}
+                height={35}
+                className="h-8 w-auto"
+              />
             </Link>
             <p className="text-sm text-muted-foreground mb-6">
               Quality & Affordable Proxies for your business needs. 90M+ IPs in
@@ -98,16 +100,16 @@ export function Footer() {
           </p>
           <div className="flex gap-6">
             <Link
-              href="#"
+              href="/privacy-policy"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
-              href="#"
+              href="/terms-and-conditions"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              Terms of Service
+              Terms and Conditions
             </Link>
             <Link
               href="#"

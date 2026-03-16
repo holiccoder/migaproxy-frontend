@@ -5,6 +5,7 @@ import Link from "next/link"
 import { ChevronDown, Menu, X } from "lucide-react"
 import { Button } from "@/components/frontend/ui/button"
 import { AnnouncementBar } from "@/components/frontend/announcement-bar"
+import BrandLogo from "@/components/common/BrandLogo"
 
 const navItems = [
   {
@@ -59,11 +60,12 @@ export function Header() {
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">G</span>
-            </div>
-            <span className="text-xl font-bold text-foreground">GoProxy</span>
+          <Link href="/" className="flex items-center">
+            <BrandLogo
+              width={154}
+              height={35}
+              className="h-8 w-auto sm:h-9"
+            />
           </Link>
 
           {/* Desktop Navigation */}

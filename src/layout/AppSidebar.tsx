@@ -2,9 +2,9 @@
 
 import React, { useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
+import BrandLogo from "@/components/common/BrandLogo";
 import {
   BoxIconLine,
   BoxCubeIcon,
@@ -15,6 +15,7 @@ import {
   GridIcon,
   GroupIcon,
   HorizontaLDots,
+  UserIcon,
   UserCircleIcon,
 } from "../icons/index";
 
@@ -42,6 +43,11 @@ const memberItems: NavItem[] = [
     icon: <BoxIconLine />,
     name: "Orders",
     path: "/user/orders",
+  },
+  {
+    icon: <UserIcon />,
+    name: "Users",
+    path: "/user/user",
   },
   {
     icon: <EnvelopeIcon />,
@@ -149,28 +155,16 @@ const AppSidebar: React.FC = () => {
       >
         <Link href="/user/dashboard">
           {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <Image
-                className="dark:hidden"
-                src="/images/logo/logo.png"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <Image
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
+            <BrandLogo
+              width={154}
+              height={35}
+              className="h-8 w-auto"
+            />
           ) : (
-            <Image
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
+            <BrandLogo
+              width={56}
+              height={13}
+              className="h-auto w-14"
             />
           )}
         </Link>
