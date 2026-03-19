@@ -3,7 +3,6 @@
 import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { Modal } from "@/components/ui/modal";
-import { ENV } from "@/config/env";
 import { ipmartApi } from "@/utils/api";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -72,6 +71,198 @@ type ProxyOptionsResponse = {
 
 type ProxyOptionsApiResponse = {
   data?: ProxyOptionsResponse;
+};
+
+type ToggleTranslationGroup = "protocol" | "proxyType" | "proxyFormat";
+
+type ToggleTranslationCache = Record<string, string>;
+
+const TOGGLE_TRANSLATION_CACHE_KEY = "ipmart_toggle_translation_cache_v1";
+const CHINESE_CHARACTER_PATTERN = /[\u3400-\u9FFF]/u;
+
+let cachedToggleTranslations: ToggleTranslationCache | null = null;
+
+const KNOWN_TOGGLE_TRANSLATIONS: Record<string, string> = {
+  "http协议": "HTTP",
+  "socks5协议": "SOCKS5",
+  "轮转": "Rotating",
+  "轮换": "Rotating",
+  "按次轮换": "Rotate Every Request",
+  "按会话轮换": "Sticky Session",
+  "粘性": "Sticky",
+  "长效会话": "Long Session",
+  "短效会话": "Short Session",
+  "文本": "Text",
+  "文本格式": "Text",
+  "json格式": "JSON",
+};
+
+const normalizeTranslationLookupKey = (value: string): string => {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, "");
+};
+
+const containsChineseCharacters = (value: string): boolean => {
+  return CHINESE_CHARACTER_PATTERN.test(value);
+};
+
+const getToggleTranslationCache = (): ToggleTranslationCache => {
+  if (cachedToggleTranslations) {
+    return cachedToggleTranslations;
+  }
+
+  if (typeof window === "undefined") {
+    cachedToggleTranslations = {};
+    return cachedToggleTranslations;
+  }
+
+  const rawCache = localStorage.getItem(TOGGLE_TRANSLATION_CACHE_KEY);
+
+  if (!rawCache) {
+    cachedToggleTranslations = {};
+    return cachedToggleTranslations;
+  }
+
+  try {
+    const parsedCache = JSON.parse(rawCache) as unknown;
+
+    if (!parsedCache || typeof parsedCache !== "object") {
+      cachedToggleTranslations = {};
+      return cachedToggleTranslations;
+    }
+
+    const normalizedCache: ToggleTranslationCache = {};
+
+    Object.entries(parsedCache as Record<string, unknown>).forEach(([key, value]) => {
+      if (typeof value === "string" && value.trim().length > 0) {
+        normalizedCache[key] = value.trim();
+      }
+    });
+
+    cachedToggleTranslations = normalizedCache;
+
+    return cachedToggleTranslations;
+  } catch {
+    cachedToggleTranslations = {};
+    return cachedToggleTranslations;
+  }
+};
+
+const persistToggleTranslationCache = (cache: ToggleTranslationCache): void => {
+  cachedToggleTranslations = cache;
+
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    localStorage.setItem(TOGGLE_TRANSLATION_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    return;
+  }
+};
+
+const inferToggleLabelFromGroup = (
+  group: ToggleTranslationGroup,
+  code: string,
+): string => {
+  const normalizedCode = code.trim().toLowerCase();
+
+  if (group === "protocol") {
+    if (normalizedCode === "2") {
+      return "SOCKS5";
+    }
+
+    return "HTTP";
+  }
+
+  if (group === "proxyType") {
+    if (normalizedCode === "0") {
+      return "Rotating";
+    }
+
+    if (normalizedCode === "1") {
+      return "Sticky 5-30 Minutes";
+    }
+
+    return `Mode ${code}`;
+  }
+
+  if (normalizedCode === "1" || normalizedCode === "json") {
+    return "JSON";
+  }
+
+  return "Text";
+};
+
+const translateToggleLabel = (
+  label: string,
+  group: ToggleTranslationGroup,
+  code: string,
+): string => {
+  const trimmedLabel = label.trim();
+
+  if (!trimmedLabel) {
+    return inferToggleLabelFromGroup(group, code);
+  }
+
+  const normalizedLabel = normalizeTranslationLookupKey(trimmedLabel);
+
+  if (KNOWN_TOGGLE_TRANSLATIONS[normalizedLabel]) {
+    return KNOWN_TOGGLE_TRANSLATIONS[normalizedLabel];
+  }
+
+  if (normalizedLabel.includes("socks")) {
+    return "SOCKS5";
+  }
+
+  if (normalizedLabel.includes("http")) {
+    return "HTTP";
+  }
+
+  if (normalizedLabel.includes("json")) {
+    return "JSON";
+  }
+
+  if (normalizedLabel.includes("txt") || normalizedLabel.includes("text")) {
+    return "Text";
+  }
+
+  if (!containsChineseCharacters(trimmedLabel)) {
+    return trimmedLabel;
+  }
+
+  return inferToggleLabelFromGroup(group, code);
+};
+
+const getTranslatedToggleLabel = (
+  label: string,
+  group: ToggleTranslationGroup,
+  code: string,
+): string => {
+  const trimmedLabel = label.trim();
+  const cacheKey = `${group}:${code.trim()}:${trimmedLabel}`;
+  const cache = getToggleTranslationCache();
+  const cachedLabel = cache[cacheKey];
+
+  if (cachedLabel) {
+    return cachedLabel;
+  }
+
+  const translatedLabel = translateToggleLabel(trimmedLabel, group, code);
+
+  if (containsChineseCharacters(trimmedLabel)) {
+    const nextCache = {
+      ...cache,
+      [cacheKey]: translatedLabel,
+    };
+
+    persistToggleTranslationCache(nextCache);
+  }
+
+  return translatedLabel;
 };
 
 const pickStoredString = (...values: unknown[]): string => {
@@ -260,17 +451,38 @@ export default function RotatingResidentialProxiesPage() {
       const data = rawData?.data as ProxyOptionsResponse | undefined;
       if (data) {
         if (data.protocols && data.protocols.length > 0) {
-          const mappedProtocols = data.protocols.map(p => ({ value: p.code, label: p.desc }));
+          const mappedProtocols = data.protocols.map((protocolOption) => ({
+            value: protocolOption.code,
+            label: getTranslatedToggleLabel(
+              protocolOption.desc,
+              "protocol",
+              protocolOption.code,
+            ),
+          }));
           setProtocolOptions(mappedProtocols);
           setProtocol(mappedProtocols[0].value);
         }
         if (data.rules && data.rules.length > 0) {
-          const mappedTypes = data.rules.map(r => ({ value: r.code, label: r.desc }));
+          const mappedTypes = data.rules.map((ruleOption) => ({
+            value: ruleOption.code,
+            label: getTranslatedToggleLabel(
+              ruleOption.desc,
+              "proxyType",
+              ruleOption.code,
+            ),
+          }));
           setProxyTypeOptions(mappedTypes);
           setProxyType(mappedTypes[0].value);
         }
         if (data.patterns && data.patterns.length > 0) {
-          const mappedFormats = data.patterns.map(p => ({ value: p.code, label: p.desc }));
+          const mappedFormats = data.patterns.map((patternOption) => ({
+            value: patternOption.code,
+            label: getTranslatedToggleLabel(
+              patternOption.desc,
+              "proxyFormat",
+              patternOption.code,
+            ),
+          }));
           setProxyFormatOptions(mappedFormats);
           setProxyFormat(mappedFormats[0].value);
         }
@@ -340,7 +552,6 @@ export default function RotatingResidentialProxiesPage() {
     void fetchUserBalance();
   }, [fetchProxyOptions, fetchUserBalance]);
 
-  const apiBaseUrl = ENV.API_BASE_URL;
 
   const testCommand = useMemo(() => {
     if (userBalance === 0) {
@@ -406,7 +617,7 @@ export default function RotatingResidentialProxiesPage() {
       setIsUpdatingPassword(true);
       setPasswordUpdateError(null);
 
-      const response = await fetch(`${apiBaseUrl}/change-proxy-password`, {
+      const response = await fetch(`/api/v1/ipmart/change-proxy-password`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -475,8 +686,8 @@ export default function RotatingResidentialProxiesPage() {
       <ComponentCard title="Endpoint Generator">
         <form className="space-y-5">
           <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              proxy username
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              Proxy username
             </label>
             <input
               type="text"
@@ -488,8 +699,8 @@ export default function RotatingResidentialProxiesPage() {
           </div>
 
           <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              proxy password
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              Proxy password
             </label>
             <div className="flex flex-wrap items-center gap-2">
               <input
@@ -514,8 +725,8 @@ export default function RotatingResidentialProxiesPage() {
           </div>
 
           <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              select location
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              Select location
             </label>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
               <select
@@ -578,8 +789,8 @@ export default function RotatingResidentialProxiesPage() {
           </div>
 
           <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              protocol
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              Protocol
             </label>
             <div className="flex flex-wrap gap-2">
               {protocolOptions.map((protocolOption) => (
@@ -600,8 +811,8 @@ export default function RotatingResidentialProxiesPage() {
           </div>
 
           <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              proxy type
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              Proxy type
             </label>
             <div className="flex flex-wrap gap-2">
               {proxyTypeOptions.map((proxyTypeOption) => (
@@ -622,8 +833,8 @@ export default function RotatingResidentialProxiesPage() {
           </div>
 
           <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              proxy format
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              Proxy format
             </label>
             <div className="flex flex-wrap gap-2">
               {proxyFormatOptions.map((formatOption) => (
@@ -644,8 +855,8 @@ export default function RotatingResidentialProxiesPage() {
           </div>
 
           <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              test command
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              Test command
             </label>
             <div className="flex flex-wrap items-center gap-2">
               <input

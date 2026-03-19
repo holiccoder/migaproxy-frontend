@@ -3,7 +3,6 @@ import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
-import { ENV } from "@/config/env";
 import { EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -29,7 +28,6 @@ type LoginResponse = {
 
 export default function SignInForm() {
   const router = useRouter();
-  const apiBaseUrl = ENV.API_BASE_URL;
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -73,8 +71,7 @@ export default function SignInForm() {
     }
 
     try {
-      const apiBaseUrl = ENV.API_BASE_URL;
-      const response = await fetch(`${apiBaseUrl}/api/v1/login`, {
+      const response = await fetch("/api/v1/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -150,7 +147,7 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="flex flex-col flex-1 lg:w-1/2 w-full">
+    <div className="flex flex-col flex-1 lg:order-2 lg:w-1/2 w-full">
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div>
           <div className="mb-5 sm:mb-8">
@@ -163,8 +160,9 @@ export default function SignInForm() {
           </div>
           <div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
-              <a
-                href={`${apiBaseUrl}/api/v1/auth/google/redirect`}
+              <Link
+                href="/api/v1/auth/google/redirect"
+                prefetch={false}
                 className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
               >
                 <svg
@@ -192,9 +190,10 @@ export default function SignInForm() {
                   />
                 </svg>
                 Login with Google
-              </a>
-              <a
-                href={`${apiBaseUrl}/api/v1/auth/github/redirect`}
+              </Link>
+              <Link
+                href="/api/v1/auth/github/redirect"
+                prefetch={false}
                 className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
               >
                 <svg
@@ -212,7 +211,7 @@ export default function SignInForm() {
                   />
                 </svg>
                 Login with GitHub
-              </a>
+              </Link>
             </div>
             <div className="relative py-3 sm:py-5">
               <div className="absolute inset-0 flex items-center">

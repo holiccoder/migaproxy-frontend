@@ -1,7 +1,11 @@
-import { Header } from "@/components/frontend/header"
-import { Footer } from "@/components/frontend/footer"
-import { Button } from "@/components/frontend/ui/button"
-import Link from "next/link"
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Footer } from "@/components/frontend/footer";
+import { Header } from "@/components/frontend/header";
+import { Button } from "@/components/frontend/ui/button";
+import { createPageMetadata, frontendSeoPages } from "@/lib/seo/page-seo";
+
+export const metadata: Metadata = createPageMetadata(frontendSeoPages.contact);
 
 export default function ContactPage() {
   return (
@@ -130,5 +134,5 @@ export default function ContactPage() {
       </section>
       <Footer />
     </main>
-  )
+  );
 }

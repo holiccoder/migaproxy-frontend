@@ -118,8 +118,6 @@ export default function AffiliatePage() {
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const [autoTransferEnabled, setAutoTransferEnabled] = useState(false);
 
-  const apiBaseUrl = ENV.API_BASE_URL;
-
   const appBaseUrl = ENV.APP_BASE_URL;
 
   const getAuthToken = (): string | null => {
@@ -216,7 +214,7 @@ export default function AffiliatePage() {
         setIsLoading(true);
         setErrorMessage(null);
 
-        const response = await fetch(`${apiBaseUrl}/api/v1/affiliate/dashboard`, {
+        const response = await fetch("/api/v1/affiliate/dashboard", {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -249,7 +247,7 @@ export default function AffiliatePage() {
     };
 
     void fetchDashboard();
-  }, [apiBaseUrl]);
+  }, []);
 
   useEffect(() => {
     const fetchConversions = async (): Promise<void> => {
@@ -260,7 +258,7 @@ export default function AffiliatePage() {
       }
 
       try {
-        const response = await fetch(`${apiBaseUrl}/api/v1/affiliate/conversions?page=${conversionPage}`, {
+        const response = await fetch(`/api/v1/affiliate/conversions?page=${conversionPage}`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -281,7 +279,7 @@ export default function AffiliatePage() {
     };
 
     void fetchConversions();
-  }, [apiBaseUrl, conversionPage]);
+  }, [conversionPage]);
 
   return (
     <div>
@@ -367,7 +365,7 @@ export default function AffiliatePage() {
                   onChange={(event) => {
                     setDeepLinkInput(event.target.value);
                   }}
-                  placeholder="Paste a URL from your SaaS, e.g. https://sass-starter.test/blog"
+                  placeholder="Paste a URL from your SaaS, e.g. http://127.0.0.1:8001/blog"
                   className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
                 />
 

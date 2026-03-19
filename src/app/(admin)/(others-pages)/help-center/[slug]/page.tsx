@@ -1,7 +1,6 @@
 "use client";
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import { ENV } from "@/config/env";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
@@ -58,8 +57,6 @@ export default function HelpCenterArticlePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const apiBaseUrl = ENV.API_BASE_URL;
-
   useEffect(() => {
     if (!slug) {
       setErrorMessage("Article not found.");
@@ -72,7 +69,7 @@ export default function HelpCenterArticlePage() {
         setIsLoading(true);
         setErrorMessage(null);
         const response = await fetch(
-          `${apiBaseUrl}/api/v1/help-center/articles/${encodeURIComponent(slug)}`,
+          `/api/v1/help-center/articles/${encodeURIComponent(slug)}`,
           {
             method: "GET",
             headers: {
@@ -98,7 +95,7 @@ export default function HelpCenterArticlePage() {
     };
 
     void fetchArticle();
-  }, [apiBaseUrl, slug]);
+  }, [slug]);
 
   const relatedArticles = useMemo(() => {
     if (!article) {

@@ -11,33 +11,29 @@ import {
   FaYandex,
 } from "react-icons/fa"
 import { SiSelenium } from "react-icons/si"
+import homePageData from "@/data/home-page.json"
 
-const logos = [
-  { name: "Edge", icon: FaEdge },
-  { name: "Firefox", icon: FaFirefoxBrowser },
-  { name: "Windows", icon: FaWindows },
-  { name: "Yandex", icon: FaYandex },
-  { name: "Yahoo", icon: FaYahoo },
-  { name: "Slack", icon: FaSlack },
-  { name: "Android", icon: FaAndroid },
-  { name: "Safari", icon: FaSafari },
-  { name: "Selenium", icon: SiSelenium },
-  { name: "Chrome", icon: FaChrome },
-  { name: "Bing", icon: BiLogoBing },
-]
-
-const rows = [
-  { direction: "left", duration: 30 },
-  { direction: "right", duration: 34 },
-  { direction: "left", duration: 32 },
-]
+const iconMap = {
+  FaEdge,
+  FaFirefoxBrowser,
+  FaWindows,
+  FaYandex,
+  FaYahoo,
+  FaSlack,
+  FaAndroid,
+  FaSafari,
+  SiSelenium,
+  FaChrome,
+  BiLogoBing,
+} as const
 
 export function LogoMarquee() {
-  const doubled = [...logos, ...logos]
+  const logoMarqueeData = homePageData.logoMarquee
+  const doubled = [...logoMarqueeData.logos, ...logoMarqueeData.logos]
 
   return (
     <div className="space-y-4">
-      {rows.map((row, rowIndex) => (
+      {logoMarqueeData.rows.map((row, rowIndex) => (
         <div key={rowIndex} className="logo-row">
           <div
             className={`logo-track ${
@@ -47,15 +43,23 @@ export function LogoMarquee() {
             }`}
             style={{ ["--duration" as never]: `${row.duration}s` }}
           >
-            {doubled.map((logo, index) => (
-              <div key={`${logo.name}-${index}`} className="logo-tile">
-                <logo.icon
-                  className="h-[100px] w-[100px] text-primary"
-                  aria-label={logo.name}
-                  title={logo.name}
-                />
-              </div>
-            ))}
+            {doubled.map((logo, index) => {
+              const IconComponent = iconMap[logo.icon as keyof typeof iconMap]
+
+              if (!IconComponent) {
+                return null
+              }
+
+              return (
+                <div key={`${logo.name}-${index}`} className="logo-tile">
+                  <IconComponent
+                    className="h-[100px] w-[100px] text-primary"
+                    aria-label={logo.name}
+                    title={logo.name}
+                  />
+                </div>
+              )
+            })}
           </div>
         </div>
       ))}

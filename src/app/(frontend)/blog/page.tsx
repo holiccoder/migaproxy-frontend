@@ -1,13 +1,17 @@
-import Link from "next/link"
-import { Header } from "@/components/frontend/header"
-import { Footer } from "@/components/frontend/footer"
-import { BlogCards, type BlogPost } from "@/components/frontend/blog-cards"
-import { PillButtons } from "@/components/frontend/pill-buttons"
-import { BlogPagination } from "@/components/frontend/blog-pagination"
-import { apiGet } from "@/lib/api"
-import { BLOG_POSTS_API_ENDPOINT, toBlogImageUrl } from "@/lib/blog-endpoints"
+import type { Metadata } from "next";
+import Link from "next/link";
+import { BlogCards, type BlogPost } from "@/components/frontend/blog-cards";
+import { BlogPagination } from "@/components/frontend/blog-pagination";
+import { Footer } from "@/components/frontend/footer";
+import { Header } from "@/components/frontend/header";
+import { PillButtons } from "@/components/frontend/pill-buttons";
+import { apiGet } from "@/lib/api";
+import { BLOG_POSTS_API_ENDPOINT, toBlogImageUrl } from "@/lib/blog-endpoints";
+import { createPageMetadata, frontendSeoPages } from "@/lib/seo/page-seo";
 
-export const dynamic = "force-dynamic"
+export const metadata: Metadata = createPageMetadata(frontendSeoPages.blog);
+
+export const dynamic = "force-dynamic";
 
 type ApiBlogPost = {
   id: number

@@ -15,7 +15,6 @@ import {
   GridIcon,
   GroupIcon,
   HorizontaLDots,
-  UserIcon,
   UserCircleIcon,
 } from "../icons/index";
 
@@ -43,11 +42,6 @@ const memberItems: NavItem[] = [
     icon: <BoxIconLine />,
     name: "Orders",
     path: "/user/orders",
-  },
-  {
-    icon: <UserIcon />,
-    name: "Users",
-    path: "/user/user",
   },
   {
     icon: <EnvelopeIcon />,

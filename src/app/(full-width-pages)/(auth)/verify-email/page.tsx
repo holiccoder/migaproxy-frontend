@@ -1,4 +1,4 @@
-import VerifyEmailForm from "@/components/auth/VerifyEmailForm";
+import VerifyEmailRedirect from "@/components/auth/VerifyEmailRedirect";
 import { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function VerifyEmailPage() {
   return (
     <Suspense fallback={<div className="px-4 py-10 text-sm text-gray-500">Loading verification status...</div>}>
-      <VerifyEmailForm />
+      <VerifyEmailRedirect />
     </Suspense>
   );
 }

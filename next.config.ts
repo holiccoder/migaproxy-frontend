@@ -3,7 +3,11 @@ import path from "node:path";
 
 const DEFAULT_API_BASE_URL = "http://localhost:8001";
 
-const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL)
+const apiBaseUrl = (
+  process.env.API_PROXY_URL ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  DEFAULT_API_BASE_URL
+)
   .replace(/\/+$/, "")
   .replace(/\/api$/, "");
 
@@ -23,9 +27,9 @@ const apiStorageRemotePattern = {
 };
 
 const blogStorageRemotePattern = {
-  protocol: "https" as const,
-  hostname: "sass-starter.test",
-  port: undefined,
+  protocol: "http" as const,
+  hostname: "127.0.0.1",
+  port: "8001",
   pathname: "/storage/**",
 };
 
@@ -53,14 +57,6 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname),
   },
 
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${apiBaseUrl}/api/:path*`,
-      },
-    ];
-  },
 
   async headers() {
     return [

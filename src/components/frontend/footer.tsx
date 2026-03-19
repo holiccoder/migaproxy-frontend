@@ -1,46 +1,18 @@
 import Link from "next/link"
 import { Facebook, Twitter, Linkedin, Youtube } from "lucide-react"
 import BrandLogo from "@/components/common/BrandLogo"
+import homePageData from "@/data/home-page.json"
 
-const footerLinks = {
-  Products: [
-    { label: "Residential Proxies", href: "#" },
-    { label: "Static Residential Proxies", href: "#" },
-    { label: "Mobile Proxies", href: "#" },
-    { label: "Datacenter Proxies", href: "#" },
-    { label: "Unlimited Residential Proxies", href: "#" },
-  ],
-  Solutions: [
-    { label: "Web Scraping", href: "#" },
-    { label: "Ad Verification", href: "#" },
-    { label: "SEO Monitoring", href: "#" },
-    { label: "Social Media", href: "#" },
-    { label: "Market Research", href: "#" },
-  ],
-  Resources: [
-    { label: "Blog", href: "#" },
-    { label: "API Documentation", href: "#" },
-    { label: "Help Center", href: "#" },
-    { label: "Affiliate Program", href: "#" },
-    { label: "Partner Program", href: "#" },
-  ],
-  Company: [
-    { label: "About Us", href: "#" },
-    { label: "Contact", href: "#" },
-    { label: "Privacy Policy", href: "/privacy-policy" },
-    { label: "Terms and Conditions", href: "/terms-and-conditions" },
-    { label: "Refund Policy", href: "#" },
-  ],
-}
-
-const socialLinks = [
-  { icon: Facebook, href: "#", label: "Facebook" },
-  { icon: Twitter, href: "#", label: "Twitter" },
-  { icon: Linkedin, href: "#", label: "LinkedIn" },
-  { icon: Youtube, href: "#", label: "YouTube" },
-]
+const socialIconMap = {
+  Facebook,
+  Twitter,
+  Linkedin,
+  Youtube,
+} as const
 
 export function Footer() {
+  const footerData = homePageData.footer
+
   return (
     <footer className="bg-card border-t border-border">
       <div className="container mx-auto px-4 lg:px-8 py-16">
@@ -56,29 +28,37 @@ export function Footer() {
               />
             </Link>
             <p className="text-sm text-muted-foreground mb-6">
-              Quality & Affordable Proxies for your business needs. 90M+ IPs in
-              200+ countries.
+              {footerData.description}
             </p>
             <div className="flex gap-4">
-              {socialLinks.map((social) => (
-                <Link
-                  key={social.label}
-                  href={social.href}
-                  className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center hover:bg-primary/20 transition-colors"
-                  aria-label={social.label}
-                >
-                  <social.icon className="w-5 h-5 text-muted-foreground" />
-                </Link>
-              ))}
+              {footerData.socialLinks.map((social) => {
+                const SocialIcon =
+                  socialIconMap[social.icon as keyof typeof socialIconMap]
+
+                if (!SocialIcon) {
+                  return null
+                }
+
+                return (
+                  <Link
+                    key={social.label}
+                    href={social.href}
+                    className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center hover:bg-primary/20 transition-colors"
+                    aria-label={social.label}
+                  >
+                    <SocialIcon className="w-5 h-5 text-muted-foreground" />
+                  </Link>
+                )
+              })}
             </div>
           </div>
 
           {/* Link Columns */}
-          {Object.entries(footerLinks).map(([title, links]) => (
-            <div key={title}>
-              <h3 className="font-semibold text-foreground mb-4">{title}</h3>
+          {footerData.linkGroups.map((group) => (
+            <div key={group.title}>
+              <h3 className="font-semibold text-foreground mb-4">{group.title}</h3>
               <ul className="space-y-3">
-                {links.map((link) => (
+                {group.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
@@ -96,27 +76,18 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} GoProxy. All rights reserved.
+            {footerData.copyright.symbol} {new Date().getFullYear()} {footerData.copyright.brand}. {footerData.copyright.suffix}
           </p>
           <div className="flex gap-6">
-            <Link
-              href="/privacy-policy"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href="/terms-and-conditions"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Terms and Conditions
-            </Link>
-            <Link
-              href="#"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Cookie Policy
-            </Link>
+            {footerData.legalLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
       </div>

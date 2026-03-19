@@ -161,11 +161,11 @@ export default function RotatingResidentialApiPage() {
     <div className="space-y-6">
       <PageBreadcrumb pageTitle="Rotating Residential API" />
 
-      <ComponentCard title="proxy setup">
+      <ComponentCard title="Proxy Setup">
         <form className="space-y-5">
           <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              select location
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              Select location
             </label>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
               <select
@@ -228,8 +228,8 @@ export default function RotatingResidentialApiPage() {
           </div>
 
           <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              extract format
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              Extract format
             </label>
             <div className="flex flex-wrap gap-2">
               {extractFormats.map((format) => (
@@ -250,8 +250,8 @@ export default function RotatingResidentialApiPage() {
           </div>
 
           <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              qty
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              Qty
             </label>
             <input
               type="number"
@@ -263,8 +263,8 @@ export default function RotatingResidentialApiPage() {
           </div>
 
           <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              duration (5-30 minutes)
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              Duration (5-30 minutes)
             </label>
             <input
               type="number"
@@ -277,8 +277,8 @@ export default function RotatingResidentialApiPage() {
           </div>
 
           <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              link
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              Link
             </label>
             <div className="flex flex-wrap items-center gap-2">
               <input

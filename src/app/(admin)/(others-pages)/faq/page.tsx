@@ -1,7 +1,6 @@
 "use client";
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import { ENV } from "@/config/env";
 import React, { useEffect, useState } from "react";
 
 type FaqItem = {
@@ -26,8 +25,7 @@ export default function FaqPage() {
         setIsLoading(true);
         setErrorMessage(null);
 
-        const apiBaseUrl = ENV.API_BASE_URL;
-        const response = await fetch(`${apiBaseUrl}/api/v1/faq`, {
+        const response = await fetch("/api/v1/faq", {
           method: "GET",
           headers: {
             Accept: "application/json",

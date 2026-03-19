@@ -1,8 +1,12 @@
-import { Header } from "@/components/frontend/header"
-import { Footer } from "@/components/frontend/footer"
-import { LocationsSection } from "@/components/frontend/locations-section"
-import { AllCountriesSection } from "@/components/frontend/all-countries-section"
-import Link from "next/link"
+import type { Metadata } from "next";
+import Link from "next/link";
+import { AllCountriesSection } from "@/components/frontend/all-countries-section";
+import { Footer } from "@/components/frontend/footer";
+import { Header } from "@/components/frontend/header";
+import { LocationsSection } from "@/components/frontend/locations-section";
+import { createPageMetadata, frontendSeoPages } from "@/lib/seo/page-seo";
+
+export const metadata: Metadata = createPageMetadata(frontendSeoPages.proxiesLocation);
 
 export default function ProxiesLocationPage() {
   return (
@@ -30,5 +34,5 @@ export default function ProxiesLocationPage() {
       <AllCountriesSection />
       <Footer />
     </main>
-  )
+  );
 }

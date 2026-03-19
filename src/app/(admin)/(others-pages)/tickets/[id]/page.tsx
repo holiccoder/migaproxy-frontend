@@ -1,7 +1,7 @@
 "use client";
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import { ENV } from "@/config/env";
+import { toRelativeApiUrl } from "@/config/env";
 import { useParams, useRouter } from "next/navigation";
 import React, { ChangeEvent, DragEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -44,6 +44,16 @@ type ReplyResponse = {
   };
 };
 
+const toStorageAssetUrl = (path: string): string => {
+  const normalizedPath = path.replace(/^\/+/, "");
+
+  if (normalizedPath.startsWith("storage/")) {
+    return `/${normalizedPath}`;
+  }
+
+  return `/storage/${normalizedPath}`;
+};
+
 export default function TicketDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -68,8 +78,6 @@ export default function TicketDetailPage() {
   const [isClosing, setIsClosing] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const apiBaseUrl = ENV.API_BASE_URL;
 
   const getAuthToken = (): string | null => {
     const localToken = localStorage.getItem("auth_token");
@@ -125,7 +133,7 @@ export default function TicketDetailPage() {
       setIsLoading(true);
       setErrorMessage(null);
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/tickets/${encodeURIComponent(ticketId)}`,
+        `/api/v1/tickets/${encodeURIComponent(ticketId)}`,
         {
         method: "GET",
         headers: {
@@ -147,7 +155,7 @@ export default function TicketDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [apiBaseUrl, ticketId]);
+  }, [ticketId]);
 
   useEffect(() => {
     if (!ticketId) {
@@ -189,10 +197,10 @@ export default function TicketDetailPage() {
     }
 
     if (attachmentPath.startsWith("http://") || attachmentPath.startsWith("https://")) {
-      return attachmentPath;
+      return toRelativeApiUrl(attachmentPath);
     }
 
-    return `${apiBaseUrl}/storage/${attachmentPath}`;
+    return toStorageAssetUrl(attachmentPath);
   };
 
   const sendReply = async (): Promise<void> => {
@@ -238,7 +246,7 @@ export default function TicketDetailPage() {
         });
       }
 
-      const response = await fetch(`${apiBaseUrl}/api/v1/tickets/${ticket.id}/replies`, {
+      const response = await fetch(`/api/v1/tickets/${ticket.id}/replies`, {
         method: "POST",
         headers,
         body: requestBody,
@@ -290,7 +298,7 @@ export default function TicketDetailPage() {
     setIsClosing(true);
 
     try {
-      await fetch(`${apiBaseUrl}/api/v1/tickets/${ticket.id}/close`, {
+      await fetch(`/api/v1/tickets/${ticket.id}/close`, {
         method: "POST",
         headers: {
           Accept: "application/json",

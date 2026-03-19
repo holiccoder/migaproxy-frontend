@@ -1,6 +1,5 @@
 "use client";
 
-import { ENV } from "@/config/env";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
@@ -113,8 +112,6 @@ export default function DashboardLatestActivity() {
   const [ordersError, setOrdersError] = useState<string | null>(null);
   const [historiesError, setHistoriesError] = useState<string | null>(null);
 
-  const apiBaseUrl = ENV.API_BASE_URL;
-
   useEffect(() => {
     const fetchDashboardActivity = async (): Promise<void> => {
       const token = getAuthToken();
@@ -141,11 +138,11 @@ export default function DashboardLatestActivity() {
 
       try {
         const [ordersResponse, historiesResponse] = await Promise.all([
-          fetch(`${apiBaseUrl}/api/v1/orders?page=1&per_page=10`, {
+          fetch("/api/v1/orders?page=1&per_page=10", {
             method: "GET",
             headers,
           }),
-          fetch(`${apiBaseUrl}/api/v1/wallet/history?page=1&per_page=10`, {
+          fetch("/api/v1/wallet/history?page=1&per_page=10", {
             method: "GET",
             headers,
           }),
@@ -184,13 +181,13 @@ export default function DashboardLatestActivity() {
     };
 
     void fetchDashboardActivity();
-  }, [apiBaseUrl]);
+  }, []);
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Latest 10 Orders</h3>
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Latest Orders</h3>
           <Link
             href="/user/orders"
             className="text-xs font-medium uppercase tracking-wide text-brand-500 hover:text-brand-600"
@@ -267,7 +264,7 @@ export default function DashboardLatestActivity() {
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Latest 10 Balance History</h3>
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Latest Balance History</h3>
           <Link
             href="/user/wallet"
             className="text-xs font-medium uppercase tracking-wide text-brand-500 hover:text-brand-600"

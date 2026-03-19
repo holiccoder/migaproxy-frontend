@@ -86,7 +86,7 @@ export const helpArticles: HelpArticle[] = [
         ],
         codeBlock: {
           language: "bash",
-          code: "curl -X GET https://sass-starter.test/api/v1/plans \\\n+  -H \"Accept: application/json\" \\\n+  -H \"Authorization: Bearer YOUR_TOKEN\"",
+          code: "curl -X GET http://127.0.0.1:8001/api/v1/plans \\\n +  -H \"Accept: application/json\" \\\n +  -H \"Authorization: Bearer YOUR_TOKEN\"",
         },
       },
       {

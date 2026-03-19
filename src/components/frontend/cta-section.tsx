@@ -1,7 +1,10 @@
 import { Button } from "@/components/frontend/ui/button"
 import { ArrowRight } from "lucide-react"
+import homePageData from "@/data/home-page.json"
 
 export function CtaSection() {
+  const ctaData = homePageData.ctaSection
+
   return (
     <section className="py-20 lg:py-32">
       <div className="container mx-auto px-4 lg:px-8">
@@ -12,11 +15,10 @@ export function CtaSection() {
 
           <div className="relative z-10 text-center max-w-3xl mx-auto">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6 text-balance">
-              Start premium proxies risk-free trial today!
+              {ctaData.title}
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Unlock the power of proxies: Get your first trial with all features
-              for only $4.99/GB.
+              {ctaData.description}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -24,7 +26,7 @@ export function CtaSection() {
                 size="lg"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8 text-base"
               >
-                Start free trial
+                {ctaData.primaryButtonLabel}
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
               <Button
@@ -32,7 +34,7 @@ export function CtaSection() {
                 variant="outline"
                 className="rounded-full px-8 text-base border-border hover:bg-secondary bg-transparent"
               >
-                Talk to an expert
+                {ctaData.secondaryButtonLabel}
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </div>

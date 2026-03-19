@@ -2,7 +2,6 @@
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import PricingPlanCard from "@/components/common/PricingPlanCard";
-import { ENV } from "@/config/env";
 import React, { useEffect, useState } from "react";
 
 type Plan = {
@@ -138,7 +137,7 @@ const parseFeatureText = (text: string): PlanFeature | null => {
     return null;
   }
 
-  const separators = [":", "：", "=", "|"];
+  const separators = [":", "\uFF1A", "=", "|"];
 
   for (const separator of separators) {
     if (!trimmedText.includes(separator)) {
@@ -289,7 +288,34 @@ export default function PricingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const apiBaseUrl = ENV.API_BASE_URL;
+  const copiedPlan = plans.length > 0 ? plans[plans.length - 1] : null;
+  const customPlanDescription = "Custom plan, tailor to your needs";
+  const customPlanFeatures =
+    copiedPlan && copiedPlan.features.length > 0
+      ? (() => {
+          const updatedFeatures = copiedPlan.features.map((feature) => {
+            return feature.key.trim().toLowerCase() === "price"
+              ? {
+                  ...feature,
+                  value: "Custom",
+                }
+              : feature;
+          });
+          const hasPriceFeature = updatedFeatures.some((feature) => {
+            return feature.key.trim().toLowerCase() === "price";
+          });
+
+          return hasPriceFeature
+            ? updatedFeatures
+            : [{ key: "Price", value: "Custom" }, ...updatedFeatures];
+        })()
+      : [
+          { key: "Price", value: "Custom" },
+          { key: "Plan", value: "Fully custom" },
+          { key: "Traffic", value: "Flexible" },
+          { key: "Support", value: "Priority" },
+        ];
+
 
   useEffect(() => {
     const fetchPlans = async (): Promise<void> => {
@@ -299,7 +325,7 @@ export default function PricingPage() {
 
         const token = getAuthToken();
 
-        const response = await fetch(`${apiBaseUrl}/api/v1/plans`, {
+        const response = await fetch(`/api/v1/plans`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -343,11 +369,11 @@ export default function PricingPage() {
 
           return {
             id: planId ?? `plan-${index}`,
-            name: rawName || "未命名套餐",
-            description: rawDescription || "暂无套餐描述。",
+            name: rawName || "Unnamed Plan",
+            description: rawDescription || "No description available",
             features: normalizeFeatures(featuresSource),
             purchaseHref: planId
-              ? `/user/orders/purchase/${encodeURIComponent(planId)}`
+              ? `/user/checkout/${encodeURIComponent(planId)}`
               : null,
           };
         });
@@ -361,7 +387,7 @@ export default function PricingPage() {
     };
 
     void fetchPlans();
-  }, [apiBaseUrl]);
+  }, []);
 
   return (
     <div>
@@ -386,7 +412,7 @@ export default function PricingPage() {
       ) : null}
 
       {!isLoading && !errorMessage && plans.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {plans.map((plan) => (
             <PricingPlanCard
               key={plan.id}
@@ -396,6 +422,15 @@ export default function PricingPage() {
               purchaseHref={plan.purchaseHref}
             />
           ))}
+
+          <PricingPlanCard
+            key="custom-plan"
+            name="Custom"
+            description={customPlanDescription}
+            features={customPlanFeatures}
+            purchaseHref="/user/tickets"
+            actionLabel="Contact Customer Support"
+          />
         </div>
       ) : null}
     </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import { ENV } from "@/config/env";
 import React, { useEffect, useState } from "react";
 
 type OrderStatus = "pending" | "paid" | "failed";
@@ -28,7 +27,6 @@ export default function OrdersPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | OrderStatus>("all");
 
-  const apiBaseUrl = ENV.API_BASE_URL;
 
   const getAuthToken = (): string | null => {
     const localToken = localStorage.getItem("auth_token");
@@ -94,7 +92,7 @@ export default function OrdersPage() {
         }
 
         const response = await fetch(
-          `${apiBaseUrl}/api/v1/orders${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
+          `/api/v1/orders${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
           {
             method: "GET",
             headers: {
@@ -119,7 +117,7 @@ export default function OrdersPage() {
     };
 
     void fetchOrders();
-  }, [apiBaseUrl, statusFilter]);
+  }, [statusFilter]);
 
   return (
     <div>

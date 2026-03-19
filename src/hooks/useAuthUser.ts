@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ENV } from "@/config/env";
+import { toRelativeApiUrl } from "@/config/env";
 
 type AuthUser = {
   id: number | string;
@@ -79,6 +79,16 @@ const toNullableString = (value: unknown): string | null => {
 
 const toNullableNumber = (value: unknown): number | null => {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
+};
+
+const toStorageAssetUrl = (path: string): string => {
+  const normalizedPath = path.replace(/^\/+/, "");
+
+  if (normalizedPath.startsWith("storage/")) {
+    return `/${normalizedPath}`;
+  }
+
+  return `/storage/${normalizedPath}`;
 };
 
 const toAuthUser = (value: unknown): AuthUser | null => {
@@ -237,8 +247,7 @@ export const useAuthUser = (): UseAuthUserResult => {
 
     try {
       setErrorMessage(null);
-      const apiBaseUrl = ENV.API_BASE_URL;
-      const response = await fetch(`${apiBaseUrl}/api/user`, {
+      const response = await fetch("/api/user", {
         method: "GET",
         headers: {
           Accept: "application/json",
@@ -254,9 +263,9 @@ export const useAuthUser = (): UseAuthUserResult => {
 
       const payload = (await response.json()) as AuthUser;
       const avatarUrl = payload.avatar_url
-        ? payload.avatar_url
+        ? toRelativeApiUrl(payload.avatar_url)
         : payload.avatar_path
-        ? `${apiBaseUrl}/storage/${payload.avatar_path}`
+        ? toStorageAssetUrl(payload.avatar_path)
         : null;
 
       const nextUser = {

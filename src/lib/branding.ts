@@ -1,75 +1,109 @@
-import { ENV } from "@/config/env"
+import { toRelativeApiUrl } from "@/config/env"
 import { apiGet } from "@/lib/api"
 
-const BRANDING_SETTINGS_API_ENDPOINT = `${ENV.API_BASE_URL}/api/v1/settings/branding`
+const BRANDING_SETTINGS_API_ENDPOINT = "/api/v1/settings/branding"
 const FALLBACK_FRONTEND_LOGO_URL = "/images/logo/logo.svg"
-const LOGO_CACHE_TTL_IN_MS = 60_000
+const FALLBACK_FRONTEND_FAVICON_URL = "/favicon.ico"
+const BRANDING_SETTINGS_CACHE_TTL_IN_MS = 60_000
 
 type BrandingSettingsResponse = {
   data?: {
     logo_url?: string | null
+    favicon_url?: string | null
   }
+}
+
+type BrandingAssets = {
+  logoUrl: string
+  faviconUrl: string
 }
 
 const isAbsoluteUrl = (value: string): boolean => /^https?:\/\//i.test(value)
 
-const resolveLogoUrl = (value: string): string => {
+const resolveAssetUrl = (value: string): string => {
   const trimmedValue = value.trim()
 
   if (isAbsoluteUrl(trimmedValue)) {
-    return trimmedValue
+    return toRelativeApiUrl(trimmedValue)
   }
 
   if (trimmedValue.startsWith("/")) {
-    return `${ENV.API_BASE_URL}${trimmedValue}`
+    return trimmedValue
   }
 
-  return `${ENV.API_BASE_URL}/${trimmedValue}`
+  return `/${trimmedValue.replace(/^\/+/, "")}`
 }
 
-let logoUrlPromise: Promise<string> | null = null
-let cachedLogoUrl: string | null = null
-let cachedLogoUrlAt = 0
+const getFallbackBrandingAssets = (): BrandingAssets => ({
+  logoUrl: FALLBACK_FRONTEND_LOGO_URL,
+  faviconUrl: FALLBACK_FRONTEND_FAVICON_URL,
+})
+
+let brandingAssetsPromise: Promise<BrandingAssets> | null = null
+let cachedBrandingAssets: BrandingAssets | null = null
+let cachedBrandingAssetsAt = 0
 
 export function getFallbackFrontendLogoUrl(): string {
   return FALLBACK_FRONTEND_LOGO_URL
 }
 
-export async function getFrontendLogoUrl(): Promise<string> {
+export function getFallbackFrontendFaviconUrl(): string {
+  return FALLBACK_FRONTEND_FAVICON_URL
+}
+
+async function getFrontendBrandingAssets(): Promise<BrandingAssets> {
   if (
-    cachedLogoUrl !== null &&
-    Date.now() - cachedLogoUrlAt < LOGO_CACHE_TTL_IN_MS
+    cachedBrandingAssets !== null &&
+    Date.now() - cachedBrandingAssetsAt < BRANDING_SETTINGS_CACHE_TTL_IN_MS
   ) {
-    return cachedLogoUrl
+    return cachedBrandingAssets
   }
 
-  if (!logoUrlPromise) {
-    logoUrlPromise = apiGet<BrandingSettingsResponse>(BRANDING_SETTINGS_API_ENDPOINT)
+  if (!brandingAssetsPromise) {
+    brandingAssetsPromise = apiGet<BrandingSettingsResponse>(BRANDING_SETTINGS_API_ENDPOINT)
       .then((response) => {
         const logoUrl = response?.data?.logo_url
+        const faviconUrl = response?.data?.favicon_url
 
-        if (typeof logoUrl === "string" && logoUrl.trim().length > 0) {
-          cachedLogoUrl = resolveLogoUrl(logoUrl)
-          cachedLogoUrlAt = Date.now()
+        const resolvedLogoUrl =
+          typeof logoUrl === "string" && logoUrl.trim().length > 0
+            ? resolveAssetUrl(logoUrl)
+            : FALLBACK_FRONTEND_LOGO_URL
+        const resolvedFaviconUrl =
+          typeof faviconUrl === "string" && faviconUrl.trim().length > 0
+            ? resolveAssetUrl(faviconUrl)
+            : FALLBACK_FRONTEND_FAVICON_URL
 
-          return cachedLogoUrl
+        cachedBrandingAssets = {
+          logoUrl: resolvedLogoUrl,
+          faviconUrl: resolvedFaviconUrl,
         }
+        cachedBrandingAssetsAt = Date.now()
 
-        cachedLogoUrl = FALLBACK_FRONTEND_LOGO_URL
-        cachedLogoUrlAt = Date.now()
-
-        return FALLBACK_FRONTEND_LOGO_URL
+        return cachedBrandingAssets
       })
       .catch(() => {
-        cachedLogoUrl = FALLBACK_FRONTEND_LOGO_URL
-        cachedLogoUrlAt = Date.now()
+        cachedBrandingAssets = getFallbackBrandingAssets()
+        cachedBrandingAssetsAt = Date.now()
 
-        return FALLBACK_FRONTEND_LOGO_URL
+        return cachedBrandingAssets
       })
       .finally(() => {
-        logoUrlPromise = null
+        brandingAssetsPromise = null
       })
   }
 
-  return logoUrlPromise
+  return brandingAssetsPromise
+}
+
+export async function getFrontendLogoUrl(): Promise<string> {
+  const brandingAssets = await getFrontendBrandingAssets()
+
+  return brandingAssets.logoUrl
+}
+
+export async function getFrontendFaviconUrl(): Promise<string> {
+  const brandingAssets = await getFrontendBrandingAssets()
+
+  return brandingAssets.faviconUrl
 }

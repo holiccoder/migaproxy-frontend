@@ -1,7 +1,6 @@
 "use client";
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import { ENV } from "@/config/env";
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 
@@ -59,19 +58,17 @@ export default function HelpCenterPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const apiBaseUrl = ENV.API_BASE_URL;
-
   useEffect(() => {
     const fetchMeta = async (): Promise<void> => {
       try {
         const [categoriesResponse, popularSearchesResponse] = await Promise.all([
-          fetch(`${apiBaseUrl}/api/v1/help-center/categories`, {
+          fetch("/api/v1/help-center/categories", {
             method: "GET",
             headers: {
               Accept: "application/json",
             },
           }),
-          fetch(`${apiBaseUrl}/api/v1/help-center/popular-searches`, {
+          fetch("/api/v1/help-center/popular-searches", {
             method: "GET",
             headers: {
               Accept: "application/json",
@@ -94,7 +91,7 @@ export default function HelpCenterPage() {
     };
 
     void fetchMeta();
-  }, [apiBaseUrl]);
+  }, []);
 
   useEffect(() => {
     const fetchArticles = async (): Promise<void> => {
@@ -111,7 +108,7 @@ export default function HelpCenterPage() {
         }
 
         const response = await fetch(
-          `${apiBaseUrl}/api/v1/help-center/articles${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
+          `/api/v1/help-center/articles${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
           {
             method: "GET",
             headers: {
@@ -135,7 +132,7 @@ export default function HelpCenterPage() {
     };
 
     void fetchArticles();
-  }, [apiBaseUrl, searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory]);
 
   const filteredArticles = useMemo(() => {
     return articles;

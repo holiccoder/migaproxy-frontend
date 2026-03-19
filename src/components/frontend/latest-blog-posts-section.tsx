@@ -4,6 +4,7 @@ import { type BlogPost } from "@/components/frontend/blog-cards"
 import { Button } from "@/components/frontend/ui/button"
 import { apiGet } from "@/lib/api"
 import { BLOG_POSTS_API_ENDPOINT, toBlogImageUrl } from "@/lib/blog-endpoints"
+import homePageData from "@/data/home-page.json"
 
 type ApiBlogPost = {
   id: number
@@ -22,7 +23,8 @@ type BlogPostsResponse = {
   data: ApiBlogPost[]
 }
 
-const fallbackImage = "/images/blog/proxy-types.jpg"
+const blogSectionData = homePageData.latestBlogPostsSection
+const fallbackImage = blogSectionData.fallbackImageUrl
 
 const toBlogPost = (post: ApiBlogPost): BlogPost => ({
   id: post.id,
@@ -51,12 +53,12 @@ export async function LatestBlogPostsSection() {
     <section className="py-20 lg:py-28">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <p className="text-primary font-medium mb-4">Latest Insights</p>
+          <p className="text-primary font-medium mb-4">{blogSectionData.eyebrow}</p>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 text-balance">
-            From the GoProxy Blog
+            {blogSectionData.title}
           </h2>
           <p className="text-muted-foreground text-lg">
-            Fresh guides, technical explainers, and proxy best practices from our team.
+            {blogSectionData.description}
           </p>
         </div>
 
@@ -68,7 +70,7 @@ export async function LatestBlogPostsSection() {
             >
               <div className="flex flex-col sm:flex-row">
                 <Link
-                  href={`/blog/${post.slug}`}
+                  href={`${blogSectionData.postHrefPrefix}${post.slug}`}
                   className="relative block h-56 w-full sm:h-auto sm:w-56 sm:min-w-56"
                 >
                   <Image
@@ -82,14 +84,17 @@ export async function LatestBlogPostsSection() {
 
                 <div className="flex flex-1 flex-col p-6">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    {new Date(post.published_at).toLocaleDateString("en-US", {
+                    {new Date(post.published_at).toLocaleDateString(blogSectionData.dateLocale, {
                       year: "numeric",
                       month: "short",
                       day: "2-digit",
                     })}
                   </p>
                   <h3 className="mt-2 text-lg font-semibold text-foreground">
-                    <Link href={`/blog/${post.slug}`} className="hover:underline">
+                    <Link
+                      href={`${blogSectionData.postHrefPrefix}${post.slug}`}
+                      className="hover:underline"
+                    >
                       {post.title}
                     </Link>
                   </h3>
@@ -101,7 +106,9 @@ export async function LatestBlogPostsSection() {
                     variant="outline"
                     className="mt-5 w-fit rounded-full border-border bg-transparent text-sm"
                   >
-                    <Link href={`/blog/${post.slug}`}>Read More</Link>
+                    <Link href={`${blogSectionData.postHrefPrefix}${post.slug}`}>
+                      {blogSectionData.readMoreLabel}
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -111,7 +118,7 @@ export async function LatestBlogPostsSection() {
 
         <div className="mt-10 flex justify-center">
           <Button asChild className="rounded-full px-8">
-            <Link href="/blog">More Blog Posts</Link>
+            <Link href={blogSectionData.morePostsHref}>{blogSectionData.morePostsLabel}</Link>
           </Button>
         </div>
       </div>

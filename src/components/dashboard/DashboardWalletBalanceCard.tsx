@@ -1,6 +1,5 @@
 "use client";
 
-import { ENV } from "@/config/env";
 import { DollarLineIcon } from "@/icons";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -47,7 +46,6 @@ export default function DashboardWalletBalanceCard() {
   const [balance, setBalance] = useState(0);
   const [balanceFormatted, setBalanceFormatted] = useState<string | null>(null);
 
-  const apiBaseUrl = ENV.API_BASE_URL;
 
   useEffect(() => {
     const fetchWalletBalance = async (): Promise<void> => {
@@ -63,7 +61,7 @@ export default function DashboardWalletBalanceCard() {
         setIsLoading(true);
         setErrorMessage(null);
 
-        const response = await fetch(`${apiBaseUrl}/api/v1/wallet`, {
+        const response = await fetch("/api/v1/wallet", {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -90,7 +88,7 @@ export default function DashboardWalletBalanceCard() {
     };
 
     void fetchWalletBalance();
-  }, [apiBaseUrl]);
+  }, []);
 
   const displayedBalance = balanceFormatted ?? formatMoney(balance);
 

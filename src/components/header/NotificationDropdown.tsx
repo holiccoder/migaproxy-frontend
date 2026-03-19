@@ -1,5 +1,4 @@
 "use client";
-import { ENV } from "@/config/env";
 import Link from "next/link";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
@@ -71,8 +70,7 @@ export default function NotificationDropdown() {
       setIsLoading(true);
       setErrorMessage(null);
 
-      const apiBaseUrl = ENV.API_BASE_URL;
-      const response = await fetch(`${apiBaseUrl}/api/v1/notifications`, {
+      const response = await fetch("/api/v1/notifications", {
         method: "GET",
         headers: {
           Accept: "application/json",
@@ -122,8 +120,7 @@ export default function NotificationDropdown() {
     );
 
     try {
-      const apiBaseUrl = ENV.API_BASE_URL;
-      await fetch(`${apiBaseUrl}/api/v1/notifications/${notificationId}/read`, {
+      await fetch(`/api/v1/notifications/${notificationId}/read`, {
         method: "POST",
         headers: {
           Accept: "application/json",

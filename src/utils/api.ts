@@ -1,6 +1,5 @@
-import { ENV } from "@/config/env";
 
-const API_BASE_URL = ENV.API_ROOT_URL;
+const API_BASE_URL = "/api";
 
 export interface ApiResponse<T = any> {
   success: boolean;

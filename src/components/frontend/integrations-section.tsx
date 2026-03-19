@@ -1,83 +1,23 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/frontend/ui/button"
 import { Copy, Check } from "lucide-react"
+import homePageData from "@/data/home-page.json"
 import { LogoMarquee } from "@/components/frontend/logo-marquee"
-
-const products = [
-  "Residential Proxies",
-  "Static Residential Proxies",
-  "Datacenter Proxies",
-  "Mobile Proxies",
-  "Unlimited Residential Proxies",
-]
-
-const codeExamples = {
-  curl: `curl -U"customer-username:password" \\
-  -x "proxy.goproxy.com:30000" \\
-  "https://ipinfo.io"`,
-  python: `import requests
-
-proxies = {
-    'http': 'http://customer-username:password@proxy.goproxy.com:30000',
-    'https': 'http://customer-username:password@proxy.goproxy.com:30000'
-}
-
-response = requests.get('https://ipinfo.io', proxies=proxies)
-print(response.text)`,
-  nodejs: `const axios = require('axios');
-
-const proxy = {
-    host: 'proxy.goproxy.com',
-    port: 30000,
-    auth: {
-        username: 'customer-username',
-        password: 'password'
-    }
-};
-
-axios.get('https://ipinfo.io', { proxy })
-    .then(response => console.log(response.data));`,
-  php: `<?php
-$ch = curl_init();
-
-curl_setopt($ch, CURLOPT_URL, 'https://ipinfo.io');
-curl_setopt($ch, CURLOPT_PROXY, 'proxy.goproxy.com:30000');
-curl_setopt($ch, CURLOPT_PROXYUSERPWD, 'customer-username:password');
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-$response = curl_exec($ch);
-curl_close($ch);
-
-echo $response;
-?>`,
-  go: `package main
-
-import (
-    "fmt"
-    "net/http"
-    "net/url"
-)
-
-func main() {
-    proxyURL, _ := url.Parse("http://customer-username:password@proxy.goproxy.com:30000")
-    client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)}}
-    
-    resp, _ := client.Get("https://ipinfo.io")
-    defer resp.Body.Close()
-}`,
-}
-
-const languages = ["curl", "python", "nodejs", "php", "go"] as const
+import { Button } from "@/components/frontend/ui/button"
 
 export function IntegrationsSection() {
-  const [selectedLanguage, setSelectedLanguage] =
-    useState<(typeof languages)[number]>("curl")
+  const integrationsData = homePageData.integrationsSection
+  const languageOptions = integrationsData.languages
+  const codeExamples = integrationsData.codeExamples as Record<string, string>
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(
+    languageOptions[0]?.id ?? ""
+  )
   const [copied, setCopied] = useState(false)
+  const selectedCodeExample = codeExamples[selectedLanguage] ?? ""
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(codeExamples[selectedLanguage])
+    navigator.clipboard.writeText(selectedCodeExample)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -88,10 +28,10 @@ export function IntegrationsSection() {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6 text-balance">
-            Integration Tools
+            {integrationsData.title}
           </h2>
           <p className="text-muted-foreground text-lg">
-            Get Started Quickly: Explore Our GoProxy Integration Guides.
+            {integrationsData.description}
           </p>
         </div>
 
@@ -101,10 +41,10 @@ export function IntegrationsSection() {
             {/* Product Selector */}
             <div className="p-4 border-b border-border">
               <label className="text-sm text-muted-foreground mb-2 block">
-                Choose product:
+                {integrationsData.productSelectorLabel}
               </label>
               <select className="bg-secondary text-foreground rounded-lg px-4 py-2 text-sm border border-border">
-                {products.map((product) => (
+                {integrationsData.products.map((product) => (
                   <option key={product}>{product}</option>
                 ))}
               </select>
@@ -112,17 +52,17 @@ export function IntegrationsSection() {
 
             {/* Language Tabs */}
             <div className="flex border-b border-border overflow-x-auto">
-              {languages.map((lang) => (
+              {languageOptions.map((language) => (
                 <button
-                  key={lang}
-                  onClick={() => setSelectedLanguage(lang)}
+                  key={language.id}
+                  onClick={() => setSelectedLanguage(language.id)}
                   className={`px-6 py-3 text-sm font-medium capitalize whitespace-nowrap transition-colors ${
-                    selectedLanguage === lang
+                    selectedLanguage === language.id
                       ? "text-primary border-b-2 border-primary"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {lang === "nodejs" ? "NodeJs" : lang.toUpperCase()}
+                  {language.label}
                 </button>
               ))}
             </div>
@@ -130,7 +70,7 @@ export function IntegrationsSection() {
             {/* Code Block */}
             <div className="relative">
               <pre className="p-6 text-sm text-muted-foreground overflow-x-auto">
-                <code>{codeExamples[selectedLanguage]}</code>
+                <code>{selectedCodeExample}</code>
               </pre>
               <Button
                 variant="ghost"
@@ -151,11 +91,10 @@ export function IntegrationsSection() {
         {/* Trusted By Section */}
         <div className="text-center">
           <h3 className="text-2xl font-bold text-foreground mb-8">
-            Trusted by Thousands Worldwide
+            {integrationsData.trustedBy.title}
           </h3>
           <p className="text-muted-foreground mb-12">
-            Seamlessly working across thousands of applications and automation
-            workflows.
+            {integrationsData.trustedBy.description}
           </p>
 
           <LogoMarquee />

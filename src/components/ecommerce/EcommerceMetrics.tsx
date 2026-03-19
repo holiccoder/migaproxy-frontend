@@ -1,7 +1,6 @@
 "use client";
 
 import { BellIcon, BoxIconLine, GroupIcon, TaskIcon } from "@/icons";
-import { ENV } from "@/config/env";
 import React, { useCallback, useEffect, useState } from "react";
 
 type DashboardMetricsResponse = {
@@ -20,7 +19,6 @@ export const EcommerceMetrics = () => {
   const [openTickets, setOpenTickets] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
-  const apiBaseUrl = ENV.API_BASE_URL;
 
   const getAuthToken = useCallback((): string | null => {
     const localToken = localStorage.getItem("auth_token");
@@ -59,7 +57,7 @@ export const EcommerceMetrics = () => {
       try {
         setIsLoading(true);
 
-        const response = await fetch(`${apiBaseUrl}/api/v1/dashboard/metrics`, {
+        const response = await fetch("/api/v1/dashboard/metrics", {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -83,7 +81,7 @@ export const EcommerceMetrics = () => {
     };
 
     void fetchMetrics();
-  }, [apiBaseUrl, getAuthToken]);
+  }, [getAuthToken]);
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 md:gap-6">

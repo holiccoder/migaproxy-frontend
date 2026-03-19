@@ -3,7 +3,6 @@
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
-import { ENV } from "@/config/env";
 import { ChevronLeftIcon } from "@/icons";
 import Link from "next/link";
 import React, { FormEvent, useState } from "react";
@@ -45,8 +44,7 @@ export default function ResetPasswordForm() {
     }
 
     try {
-      const apiBaseUrl = ENV.API_BASE_URL;
-      const response = await fetch(`${apiBaseUrl}/api/v1/forgot-password`, {
+      const response = await fetch("/api/v1/forgot-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

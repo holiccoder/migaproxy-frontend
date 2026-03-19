@@ -1,6 +1,5 @@
 "use client";
 
-import { ENV } from "@/config/env";
 import React, { ChangeEvent, FormEvent, useMemo, useState } from "react";
 import { useModal } from "../../hooks/useModal";
 import { splitName, useAuthUser } from "../../hooks/useAuthUser";
@@ -81,13 +80,12 @@ export default function UserInfoCard() {
 
     try {
       const formData = new FormData(event.currentTarget);
-      const apiBaseUrl = ENV.API_BASE_URL;
 
       if (avatarFile) {
         formData.set("avatar", avatarFile);
       }
 
-      const response = await fetch(`${apiBaseUrl}/api/v1/profile`, {
+      const response = await fetch("/api/v1/profile", {
         method: "POST",
         headers: {
           Accept: "application/json",

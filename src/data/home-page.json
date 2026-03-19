@@ -1,0 +1,566 @@
+{
+  "announcementBar": {
+    "message": "Demo: New rotating pools, faster setup, and 24/7 onboarding support."
+  },
+  "header": {
+    "navItems": [
+      {
+        "label": "Proxies",
+        "items": [
+          { "label": "Residential Proxies", "href": "#" },
+          { "label": "Static Residential Proxies", "href": "#" },
+          { "label": "Mobile Proxies", "href": "#" },
+          { "label": "Datacenter Proxies", "href": "#" },
+          { "label": "Unlimited Residential Proxies", "href": "#" }
+        ]
+      },
+      {
+        "label": "Solutions",
+        "items": [
+          { "label": "Web Scraping Service", "href": "#" },
+          { "label": "Scraping Proxies", "href": "#" },
+          { "label": "SERP API", "href": "#", "badge": "NEW" }
+        ]
+      },
+      {
+        "label": "Get Pricing",
+        "items": [
+          { "label": "Residential Proxies", "href": "#" },
+          { "label": "Static Residential Proxies", "href": "#" },
+          { "label": "Mobile Proxies", "href": "#" },
+          { "label": "Datacenter Proxies", "href": "#" },
+          { "label": "Unlimited Residential Proxies", "href": "#" },
+          { "label": "All Pricing", "href": "#" }
+        ]
+      },
+      { "label": "Locations", "href": "#" },
+      {
+        "label": "Resources",
+        "items": [
+          { "label": "Blog", "href": "#" },
+          { "label": "Affiliate Program", "href": "#" },
+          { "label": "Partner", "href": "#" },
+          { "label": "Help Center", "href": "#" },
+          { "label": "API Document", "href": "#" }
+        ]
+      }
+    ],
+    "actions": {
+      "login": { "label": "Login", "href": "/login" },
+      "freeTrial": { "label": "Free Trial" }
+    }
+  },
+  "heroSection": {
+    "heading": {
+      "prefix": "Fast Residential & ",
+      "highlight": "Rotating Proxies"
+    },
+    "subheading": "Easy Global Reach",
+    "supportingText": "Empower Your Data Tasks",
+    "stats": [
+      { "value": "200+", "label": "countries & regions" },
+      { "value": "99.96%", "label": "success rate" },
+      { "value": "1GB", "label": "starting from" }
+    ],
+    "primaryCta": {
+      "label": "Get Now",
+      "supportText": "7-day Free Trial"
+    },
+    "secondaryCta": {
+      "label": "Contact Us",
+      "supportText": "24/7 Enterprise Support"
+    },
+    "featureCards": [
+      {
+        "icon": "Zap",
+        "title": "No more data limits",
+        "description": "Scrape websites efficiently and at scale without IP restrictions."
+      },
+      {
+        "icon": "Shield",
+        "title": "Effortless & Secure",
+        "description": "Experience fast and stable connections with absolute anonymity."
+      },
+      {
+        "icon": "Headphones",
+        "title": "Empower your business",
+        "description": "Support all the proxy service needs, from web scraping to ad verification."
+      }
+    ]
+  },
+  "productsSection": {
+    "eyebrow": "GoProxy Products",
+    "title": "Choose the Right Proxy for Every Need",
+    "description": "We provide a full range of proxy types and are building tailored web scraping solutions to make large-scale data access easier than ever.",
+    "featuredBadgeLabel": "Most Popular",
+    "pricePrefix": "From",
+    "ctaLabel": "Get Now",
+    "customCtaLabel": "Contact Us",
+    "products": [
+      {
+        "icon": "Globe",
+        "title": "Rotating Residential Proxies",
+        "description": "Real residential IPs from real devices with automatic IP rotation. Meet all your proxy needs for web scraping, ad verification and more.",
+        "features": [
+          "Free city geo-targeting",
+          "99.96% Success Rates",
+          "Rotating/sticky sessions",
+          "HTTP(S)/SOCKS5"
+        ],
+        "price": "$0.75",
+        "unit": "GB",
+        "featured": true
+      },
+      {
+        "icon": "Wifi",
+        "title": "Static Residential Proxies",
+        "description": "Stable residential IPs simulating real users with the same IP address. Perfect for social media account management.",
+        "features": [
+          "24/7 IP availability",
+          "99.9% network uptime",
+          "Unlimited traffic usage",
+          "HTTP(S)/SOCKS5"
+        ],
+        "price": "$2",
+        "unit": "IP",
+        "featured": false
+      },
+      {
+        "icon": "Server",
+        "title": "Datacenter Proxies",
+        "description": "Access global network through high-speed, stable datacenter proxies. Ideal for cost-effective web scraping projects.",
+        "features": [
+          "Included rotating & static",
+          "Sourced from top datacenter",
+          "Fastest connection speed",
+          "HTTP(S)/SOCKS5"
+        ],
+        "price": "$0.3",
+        "unit": "GB",
+        "featured": false
+      },
+      {
+        "icon": "Smartphone",
+        "title": "Rotating Mobile Proxies",
+        "description": "Unblock anything with real mobile proxies, powered by top carriers to access the most toughest targets with 99.96% success rate.",
+        "features": [
+          "99.9% network uptime",
+          "Free precise geo-targeting",
+          "Unlimited concurrency",
+          "Support 5G/4G/3G/LTE"
+        ],
+        "price": "$2.73",
+        "unit": "GB",
+        "featured": false
+      },
+      {
+        "icon": "Infinity",
+        "title": "Unlimited Residential Proxies",
+        "description": "Enjoy seamless browsing and scale web scraping tasks with unlimited traffic and bandwidth plans.",
+        "features": [
+          "Unlimited traffic and IPs",
+          "Unlimited concurrent requests",
+          "200+ countries & regions",
+          "Free continent geo-targeting"
+        ],
+        "price": "$57.14",
+        "unit": "Day",
+        "featured": false
+      },
+      {
+        "icon": "Settings",
+        "title": "Custom Solutions",
+        "description": "Go beyond proxies, build your custom web scraping setup for e-commerce, SEO, and more.",
+        "features": [
+          "Fully customized scraping workflows",
+          "Scalable and cloud-based architecture",
+          "Built-in proxy rotation",
+          "Real-time data delivery"
+        ],
+        "isCustom": true
+      }
+    ]
+  },
+  "trialSection": {
+    "title": "Not Sure?",
+    "description": "Try it free or start with just $2 (plus a $1 bonus for new users)",
+    "freeTrialCard": {
+      "icon": "Gift",
+      "title": "Enjoy full access to all features with our free trial:",
+      "features": [
+        "Free 100MB rotating residential / mobile proxies",
+        "Free 1 static residential / datacenter IP for 1 day",
+        "Free 1GB rotating datacenter proxies"
+      ],
+      "ctaLabel": "Start Free Trial"
+    },
+    "miniPlanCard": {
+      "badge": "$1 Credit Bonus",
+      "icon": "Zap",
+      "title": "Instant Access with Mini Plan",
+      "description": "No Waiting. New users get $1 credit bonus to start right away:",
+      "features": [
+        "$4.99 for 1GB rotating residential proxies",
+        "$2 for 1 static residential / datacenter IP",
+        "$3 for 300MB rotating mobile proxies",
+        "$5 for 5GB rotating datacenter proxies",
+        "$20 for 1 hour unlimited residential proxies"
+      ],
+      "ctaLabel": "Get $1 Credit"
+    }
+  },
+  "useCasesSection": {
+    "eyebrow": "GoProxy Solutions",
+    "title": "Built for Every Use Case That Matters",
+    "description": "Check out how enterprise and individuals use GoProxy to transform their digital operations.",
+    "tabs": [
+      { "id": "useCase", "label": "By use case" },
+      { "id": "target", "label": "By target" }
+    ],
+    "useCases": [
+      {
+        "icon": "Database",
+        "title": "Web scraping & data aggregation",
+        "description": "Large-scale crawls harvest public web data (catalogs, directories, public listings)."
+      },
+      {
+        "icon": "DollarSign",
+        "title": "Price intelligence & e-commerce monitoring",
+        "description": "Continuous or frequent checks of product pages and competitor pricing while avoiding CAPTCHA."
+      },
+      {
+        "icon": "Search",
+        "title": "SEO & SERP rank tracking",
+        "description": "Capture accurate, localized search engine results across countries/regions without location-based bias."
+      },
+      {
+        "icon": "Eye",
+        "title": "Ad verification & brand monitoring",
+        "description": "Mirror real-user environments and verify ad placements, creatives, viewability, and geo-targeted delivery."
+      },
+      {
+        "icon": "Users",
+        "title": "Social media management & account operations",
+        "description": "Manage multiple social accounts, scheduling, or automation works. Reduce flags and genuine device/locale behavior."
+      },
+      {
+        "icon": "Brain",
+        "title": "AI data collection & model training pipelines",
+        "description": "Collect large, geo-diverse datasets for model training, validation, or fine-tuning."
+      },
+      {
+        "icon": "Globe",
+        "title": "Geo-restricted content testing & localization QA",
+        "description": "Test region-specific experiences (pricing, content, app behavior)."
+      },
+      {
+        "icon": "Activity",
+        "title": "Performance testing, API reliability & load simulations",
+        "description": "Use quality IPs for high-concurrency load tests or distributed API reliability checks."
+      }
+    ],
+    "targetCases": [
+      {
+        "icon": "SiGoogle",
+        "title": "Google",
+        "description": "Achieve global search results and localization for tailored marketing."
+      },
+      {
+        "icon": "SiAmazon",
+        "title": "Amazon",
+        "description": "Access international marketplaces, monitor competitors, and optimize pricing strategies."
+      },
+      {
+        "icon": "BiLogoBing",
+        "title": "Bing",
+        "description": "Customize web searches to target specific regions and demographics effectively."
+      },
+      {
+        "icon": "SiAirbnb",
+        "title": "Airbnb",
+        "description": "List and book properties seamlessly across various countries."
+      },
+      {
+        "icon": "SiYoutube",
+        "title": "YouTube",
+        "description": "Evade content restrictions and access geographically restricted videos."
+      },
+      {
+        "icon": "SiNetflix",
+        "title": "Netflix",
+        "description": "Bypass content region locks and enjoy worldwide streaming content."
+      },
+      {
+        "icon": "SiTiktok",
+        "title": "TikTok",
+        "description": "Manage TikTok accounts seamlessly across multiple global regions with secure, stable access."
+      },
+      {
+        "icon": "Activity",
+        "title": "More Targets",
+        "description": "Use high-quality proxies to support diverse target scenarios and unlock broader possibilities."
+      }
+    ]
+  },
+  "statsSection": {
+    "title": "Power Your Business with Premium Proxies",
+    "ctaLabel": "Try it free",
+    "stats": [
+      {
+        "icon": "Globe",
+        "value": "90M+",
+        "label": "IPs",
+        "description": "Vast Global Proxy Network"
+      },
+      {
+        "icon": "Activity",
+        "value": "99.9%",
+        "label": "Uptime",
+        "description": "Always-On Reliability"
+      },
+      {
+        "icon": "Zap",
+        "value": "Zero",
+        "label": "IP Blocks",
+        "description": "Lightning-fast IP Allocation"
+      },
+      {
+        "icon": "Headphones",
+        "value": "24/7",
+        "label": "Support",
+        "description": "Dedicated Service at Your Fingertips"
+      }
+    ]
+  },
+  "integrationsSection": {
+    "title": "Integration Tools",
+    "description": "Get Started Quickly: Explore Our GoProxy Integration Guides.",
+    "productSelectorLabel": "Choose product:",
+    "products": [
+      "Residential Proxies",
+      "Static Residential Proxies",
+      "Datacenter Proxies",
+      "Mobile Proxies",
+      "Unlimited Residential Proxies"
+    ],
+    "languages": [
+      { "id": "curl", "label": "CURL" },
+      { "id": "python", "label": "PYTHON" },
+      { "id": "nodejs", "label": "NodeJs" },
+      { "id": "php", "label": "PHP" },
+      { "id": "go", "label": "GO" }
+    ],
+    "codeExamples": {
+      "curl": "curl -U\"customer-username:password\" -x \"proxy.goproxy.com:30000\" \"https://ipinfo.io\"",
+      "python": "import requests\n\nproxies = {\n    'http': 'http://customer-username:password@proxy.goproxy.com:30000',\n    'https': 'http://customer-username:password@proxy.goproxy.com:30000'\n}\n\nresponse = requests.get('https://ipinfo.io', proxies=proxies)\nprint(response.text)",
+      "nodejs": "const axios = require('axios');\n\nconst proxy = {\n    host: 'proxy.goproxy.com',\n    port: 30000,\n    auth: {\n        username: 'customer-username',\n        password: 'password'\n    }\n};\n\naxios.get('https://ipinfo.io', { proxy })\n    .then(response => console.log(response.data));",
+      "php": "<?php\n$ch = curl_init();\n\ncurl_setopt($ch, CURLOPT_URL, 'https://ipinfo.io');\ncurl_setopt($ch, CURLOPT_PROXY, 'proxy.goproxy.com:30000');\ncurl_setopt($ch, CURLOPT_PROXYUSERPWD, 'customer-username:password');\ncurl_setopt($ch, CURLOPT_RETURNTRANSFER, true);\n\n$response = curl_exec($ch);\ncurl_close($ch);\n\necho $response;\n?>",
+      "go": "package main\n\nimport (\n    \"fmt\"\n    \"net/http\"\n    \"net/url\"\n)\n\nfunc main() {\n    proxyURL, _ := url.Parse(\"http://customer-username:password@proxy.goproxy.com:30000\")\n    client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)}}\n\n    resp, _ := client.Get(\"https://ipinfo.io\")\n    defer resp.Body.Close()\n}"
+    },
+    "trustedBy": {
+      "title": "Trusted by Thousands Worldwide",
+      "description": "Seamlessly working across thousands of applications and automation workflows."
+    }
+  },
+  "logoMarquee": {
+    "logos": [
+      { "name": "Edge", "icon": "FaEdge" },
+      { "name": "Firefox", "icon": "FaFirefoxBrowser" },
+      { "name": "Windows", "icon": "FaWindows" },
+      { "name": "Yandex", "icon": "FaYandex" },
+      { "name": "Yahoo", "icon": "FaYahoo" },
+      { "name": "Slack", "icon": "FaSlack" },
+      { "name": "Android", "icon": "FaAndroid" },
+      { "name": "Safari", "icon": "FaSafari" },
+      { "name": "Selenium", "icon": "SiSelenium" },
+      { "name": "Chrome", "icon": "FaChrome" },
+      { "name": "Bing", "icon": "BiLogoBing" }
+    ],
+    "rows": [
+      { "direction": "left", "duration": 30 },
+      { "direction": "right", "duration": 34 },
+      { "direction": "left", "duration": 32 }
+    ]
+  },
+  "locationsSection": {
+    "title": "Access the World with Local-Quality Connections",
+    "description": "Unlock worldwide IP access with our extensive range of IP servers in 195+ countries.",
+    "allLocationsButtonLabel": "All locations >",
+    "locations": [
+      {
+        "country": "United States",
+        "ipCount": "3,948,181 IPs",
+        "flagImageUrl": "https://flagcdn.com/w80/us.png",
+        "flagAlt": "United States flag"
+      },
+      {
+        "country": "Germany",
+        "ipCount": "3,506,009 IPs",
+        "flagImageUrl": "https://flagcdn.com/w80/de.png",
+        "flagAlt": "Germany flag"
+      },
+      {
+        "country": "Britain",
+        "ipCount": "3,193,909 IPs",
+        "flagImageUrl": "https://flagcdn.com/w80/gb.png",
+        "flagAlt": "Britain flag"
+      },
+      {
+        "country": "Canada",
+        "ipCount": "3,183,779 IPs",
+        "flagImageUrl": "https://flagcdn.com/w80/ca.png",
+        "flagAlt": "Canada flag"
+      },
+      {
+        "country": "France",
+        "ipCount": "2,348,241 IPs",
+        "flagImageUrl": "https://flagcdn.com/w80/fr.png",
+        "flagAlt": "France flag"
+      },
+      {
+        "country": "India",
+        "ipCount": "1,810,489 IPs",
+        "flagImageUrl": "https://flagcdn.com/w80/in.png",
+        "flagAlt": "India flag"
+      },
+      {
+        "country": "South Korea",
+        "ipCount": "1,541,168 IPs",
+        "flagImageUrl": "https://flagcdn.com/w80/kr.png",
+        "flagAlt": "South Korea flag"
+      },
+      {
+        "country": "Japan",
+        "ipCount": "1,210,396 IPs",
+        "flagImageUrl": "https://flagcdn.com/w80/jp.png",
+        "flagAlt": "Japan flag"
+      }
+    ]
+  },
+  "testimonialsSection": {
+    "title": "Let Customers Speak for Us",
+    "testimonials": [
+      {
+        "quote": "Best Proxy Service",
+        "content": "Hello, really good proxy service. GoProxy is the best proxy service of the market currently, not re-sell proxy.",
+        "author": "HiuestDE",
+        "rating": 5
+      },
+      {
+        "quote": "Helpful, Honest",
+        "content": "They tried very hard to get a solution working for my very specific purpose, including some custom settings. When we realized it would not work, they provided a full refund. Very courteous, honest.",
+        "author": "KarlCA",
+        "rating": 5
+      },
+      {
+        "quote": "Very nice platform with advanced...",
+        "content": "Very nice platform with advanced features and easy to use, Reliable rotating proxies. Best platform available online.",
+        "author": "Mark W. MNL",
+        "rating": 5
+      }
+    ]
+  },
+  "faqSection": {
+    "title": "Frequently Asked Questions",
+    "faqs": [
+      {
+        "question": "Which proxy type should I choose?",
+        "answer": "Each proxy type is made for different use cases: Residential Proxy is best for general scraping and accessing geo-restricted content. Static Residential Proxy keeps the same IP - great for managing accounts. Mobile Proxy works through real mobile networks. Datacenter Proxy is fast and affordable for SEO monitoring or bulk requests."
+      },
+      {
+        "question": "Is it legal to use proxies?",
+        "answer": "Yes, proxies themselves are completely legal. They're widely used for market research, SEO, ad verification, and privacy protection. Just make sure your usage follows each website's terms of service and local data laws."
+      },
+      {
+        "question": "What if my IP doesn't work?",
+        "answer": "We've got you covered. You can request one free replacement within 24 hours after purchase if the static IP isn't working. If the issue is caused by our system, we'll credit the amount to your GoProxy wallet for future use."
+      },
+      {
+        "question": "Do you offer a free trial?",
+        "answer": "Yes! You can start with a trial plan to test our service. Individual users: Simply register and fill out your use case form. Once approved, your trial will be activated within 24-48 hours. Business users: Contact our sales team for larger or customized trial access."
+      },
+      {
+        "question": "Why choose GoProxy?",
+        "answer": "GoProxy boasts an extensive pool of over 90 million IP addresses across 200+ countries, with an impressive success rate of 99.96%. We support HTTP, HTTPS, and SOCKS5 protocols, offer flexible pricing starting from 1GB, and provide 24/7 customer support."
+      }
+    ]
+  },
+  "latestBlogPostsSection": {
+    "eyebrow": "Latest Insights",
+    "title": "From the GoProxy Blog",
+    "description": "Fresh guides, technical explainers, and proxy best practices from our team.",
+    "readMoreLabel": "Read More",
+    "morePostsLabel": "More Blog Posts",
+    "morePostsHref": "/blog",
+    "postHrefPrefix": "/blog/",
+    "fallbackImageUrl": "/images/blog/proxy-types.jpg",
+    "dateLocale": "en-US"
+  },
+  "ctaSection": {
+    "title": "Start premium proxies risk-free trial today!",
+    "description": "Unlock the power of proxies: Get your first trial with all features for only $4.99/GB.",
+    "primaryButtonLabel": "Start free trial",
+    "secondaryButtonLabel": "Talk to an expert"
+  },
+  "footer": {
+    "description": "Quality & Affordable Proxies for your business needs. 90M+ IPs in 200+ countries.",
+    "socialLinks": [
+      { "icon": "Facebook", "href": "#", "label": "Facebook" },
+      { "icon": "Twitter", "href": "#", "label": "Twitter" },
+      { "icon": "Linkedin", "href": "#", "label": "LinkedIn" },
+      { "icon": "Youtube", "href": "#", "label": "YouTube" }
+    ],
+    "linkGroups": [
+      {
+        "title": "Products",
+        "links": [
+          { "label": "Residential Proxies", "href": "#" },
+          { "label": "Static Residential Proxies", "href": "#" },
+          { "label": "Mobile Proxies", "href": "#" },
+          { "label": "Datacenter Proxies", "href": "#" },
+          { "label": "Unlimited Residential Proxies", "href": "#" }
+        ]
+      },
+      {
+        "title": "Solutions",
+        "links": [
+          { "label": "Web Scraping", "href": "#" },
+          { "label": "Ad Verification", "href": "#" },
+          { "label": "SEO Monitoring", "href": "#" },
+          { "label": "Social Media", "href": "#" },
+          { "label": "Market Research", "href": "#" }
+        ]
+      },
+      {
+        "title": "Resources",
+        "links": [
+          { "label": "Blog", "href": "#" },
+          { "label": "API Documentation", "href": "#" },
+          { "label": "Help Center", "href": "#" },
+          { "label": "Affiliate Program", "href": "#" },
+          { "label": "Partner Program", "href": "#" }
+        ]
+      },
+      {
+        "title": "Company",
+        "links": [
+          { "label": "About Us", "href": "#" },
+          { "label": "Contact", "href": "#" },
+          { "label": "Privacy Policy", "href": "/privacy-policy" },
+          { "label": "Terms and Conditions", "href": "/terms-and-conditions" },
+          { "label": "Refund Policy", "href": "#" }
+        ]
+      }
+    ],
+    "copyright": {
+      "symbol": "©",
+      "brand": "GoProxy",
+      "suffix": "All rights reserved."
+    },
+    "legalLinks": [
+      { "label": "Privacy Policy", "href": "/privacy-policy" },
+      { "label": "Terms and Conditions", "href": "/terms-and-conditions" },
+      { "label": "Cookie Policy", "href": "#" }
+    ]
+  }
+}

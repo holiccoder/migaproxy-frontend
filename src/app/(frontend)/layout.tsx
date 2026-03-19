@@ -1,23 +1,22 @@
-import React from "react"
-import type { Metadata } from 'next'
+import React from "react";
+import type { Metadata } from "next";
+import { ThemeProvider } from "@/components/frontend/theme-provider";
+import GlobalStructuredData from "@/components/seo/GlobalStructuredData";
+import { createPageMetadata, frontendSeoPages } from "@/lib/seo/page-seo";
+import "./globals.css";
 
-import './globals.css'
-import { ThemeProvider } from '@/components/frontend/theme-provider'
-
-export const metadata: Metadata = {
-  title: 'GoProxy | Quality & Affordable Proxies | Residential & Rotating',
-  description: 'Fast Residential & Rotating Proxies with 90M+ IPs in 200+ countries. 99.96% success rate. Starting from $0.75/GB.',
-}
+export const metadata: Metadata = createPageMetadata(frontendSeoPages.home);
 
 export default function FrontendLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <div className="font-sans antialiased">
-      <ThemeProvider 
-        attribute="class" 
+      <GlobalStructuredData />
+      <ThemeProvider
+        attribute="class"
         value={{ light: 'light', dark: 'dark' }}
         defaultTheme="light"
         enableColorScheme={false}
@@ -25,5 +24,5 @@ export default function FrontendLayout({
         {children}
       </ThemeProvider>
     </div>
-  )
+  );
 }

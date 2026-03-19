@@ -1,7 +1,6 @@
 "use client";
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import { ENV } from "@/config/env";
 import Link from "next/link";
 import React, { FormEvent, useCallback, useEffect, useState } from "react";
 
@@ -90,8 +89,6 @@ export default function TicketsPage() {
     attachment?: string;
   }>({});
   const [createAttachment, setCreateAttachment] = useState<File | null>(null);
-
-  const apiBaseUrl = ENV.API_BASE_URL;
 
   const getAuthToken = (): string | null => {
     const localToken = localStorage.getItem("auth_token");
@@ -213,7 +210,7 @@ export default function TicketsPage() {
       }
 
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/tickets${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
+        `/api/v1/tickets${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
         {
           method: "GET",
           headers: {
@@ -235,7 +232,7 @@ export default function TicketsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [apiBaseUrl, dateFrom, dateTo, search, status]);
+  }, [dateFrom, dateTo, search, status]);
 
   useEffect(() => {
     void fetchTickets();
@@ -314,7 +311,7 @@ export default function TicketsPage() {
         });
       }
 
-      const response = await fetch(`${apiBaseUrl}/api/v1/tickets`, {
+      const response = await fetch("/api/v1/tickets", {
         method: "POST",
         headers,
         body: requestBody,

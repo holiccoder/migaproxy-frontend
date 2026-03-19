@@ -2,9 +2,8 @@ import SignUpForm from "@/components/auth/SignUpForm";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Next.js Register Page | TailAdmin - Next.js Dashboard Template",
-  description: "This is Next.js Register Page TailAdmin Dashboard Template",
-  // other metadata
+  title: "Register - MigaProxy",
+  description: "This is register page of MigaProxy, you can create an account here!",
 };
 
 export default function Register() {

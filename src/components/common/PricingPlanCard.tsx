@@ -9,6 +9,7 @@ type PricingPlanCardProps = {
     value: string;
   }>;
   purchaseHref: string | null;
+  actionLabel?: string;
 };
 
 export default function PricingPlanCard({
@@ -16,15 +17,15 @@ export default function PricingPlanCard({
   description,
   features,
   purchaseHref,
+  actionLabel,
 }: PricingPlanCardProps) {
   return (
-    <article className="mx-auto w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-white/[0.03] sm:p-8">
+    <article className="mx-auto w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
       <header className="flex items-center gap-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-100 text-sky-500 dark:bg-sky-500/15 dark:text-sky-300">
           <BoltIcon className="h-6 w-6" />
         </div>
         <div>
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">套餐详情</p>
           <h2 className="text-4xl font-bold text-gray-900 dark:text-white">{name}</h2>
         </div>
       </header>
@@ -54,9 +55,9 @@ export default function PricingPlanCard({
       {purchaseHref ? (
         <Link
           href={purchaseHref}
-          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-teal-800"
+          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-success-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-success-600"
         >
-          立即购买
+          {actionLabel ?? "Buy Now"}
           <ArrowRightIcon className="h-4 w-4" />
         </Link>
       ) : (

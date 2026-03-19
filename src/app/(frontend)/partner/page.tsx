@@ -1,6 +1,10 @@
-import Link from "next/link"
-import { Header } from "@/components/frontend/header"
-import { Footer } from "@/components/frontend/footer"
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Footer } from "@/components/frontend/footer";
+import { Header } from "@/components/frontend/header";
+import { createPageMetadata, frontendSeoPages } from "@/lib/seo/page-seo";
+
+export const metadata: Metadata = createPageMetadata(frontendSeoPages.partner);
 
 const partnerCards = [
   {

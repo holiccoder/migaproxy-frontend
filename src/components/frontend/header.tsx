@@ -6,51 +6,10 @@ import { ChevronDown, Menu, X } from "lucide-react"
 import { Button } from "@/components/frontend/ui/button"
 import { AnnouncementBar } from "@/components/frontend/announcement-bar"
 import BrandLogo from "@/components/common/BrandLogo"
-
-const navItems = [
-  {
-    label: "Proxies",
-    items: [
-      { label: "Residential Proxies", href: "#" },
-      { label: "Static Residential Proxies", href: "#" },
-      { label: "Mobile Proxies", href: "#" },
-      { label: "Datacenter Proxies", href: "#" },
-      { label: "Unlimited Residential Proxies", href: "#" },
-    ],
-  },
-  {
-    label: "Solutions",
-    items: [
-      { label: "Web Scraping Service", href: "#" },
-      { label: "Scraping Proxies", href: "#" },
-      { label: "SERP API", href: "#", badge: "NEW" },
-    ],
-  },
-  {
-    label: "Get Pricing",
-    items: [
-      { label: "Residential Proxies", href: "#" },
-      { label: "Static Residential Proxies", href: "#" },
-      { label: "Mobile Proxies", href: "#" },
-      { label: "Datacenter Proxies", href: "#" },
-      { label: "Unlimited Residential Proxies", href: "#" },
-      { label: "All Pricing", href: "#" },
-    ],
-  },
-  { label: "Locations", href: "#" },
-  {
-    label: "Resources",
-    items: [
-      { label: "Blog", href: "#" },
-      { label: "Affiliate Program", href: "#" },
-      { label: "Partner", href: "#" },
-      { label: "Help Center", href: "#" },
-      { label: "API Document", href: "#" },
-    ],
-  },
-]
+import homePageData from "@/data/home-page.json"
 
 export function Header() {
+  const headerData = homePageData.header
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
 
@@ -70,7 +29,7 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1">
-            {navItems.map((item) => (
+            {headerData.navItems.map((item) => (
               <div
                 key={item.label}
                 className="relative"
@@ -84,7 +43,7 @@ export function Header() {
                   </button>
                 ) : (
                   <Link
-                    href={item.href || "#"}
+                    href={item.href ?? ""}
                     className="flex items-center gap-1 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {item.label}
@@ -118,16 +77,16 @@ export function Header() {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Login
-            </Link>
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-6">
-              Free Trial
-            </Button>
-          </div>
+              <Link
+                href={headerData.actions.login.href}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {headerData.actions.login.label}
+              </Link>
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-6">
+                {headerData.actions.freeTrial.label}
+              </Button>
+            </div>
 
           {/* Mobile Menu Button */}
           <button
@@ -147,7 +106,7 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="lg:hidden bg-background border-t border-border">
           <div className="container mx-auto px-4 py-4">
-            {navItems.map((item) => (
+            {headerData.navItems.map((item) => (
               <div key={item.label} className="py-2">
                 {item.items ? (
                   <div>
@@ -169,7 +128,7 @@ export function Header() {
                   </div>
                 ) : (
                   <Link
-                    href={item.href || "#"}
+                    href={item.href ?? ""}
                     className="block py-2 text-foreground"
                   >
                     {item.label}
@@ -179,10 +138,10 @@ export function Header() {
             ))}
             <div className="pt-4 space-y-3">
               <Button asChild variant="outline" className="w-full rounded-full bg-transparent">
-                <Link href="/login">Login</Link>
+                <Link href={headerData.actions.login.href}>{headerData.actions.login.label}</Link>
               </Button>
               <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-full">
-                Free Trial
+                {headerData.actions.freeTrial.label}
               </Button>
             </div>
           </div>

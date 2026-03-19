@@ -1,8 +1,6 @@
-import { ENV } from "@/config/env"
+import { toRelativeApiUrl } from "@/config/env"
 
-const BLOG_ORIGIN = ENV.API_BASE_URL
-
-export const BLOG_POSTS_API_ENDPOINT = `${BLOG_ORIGIN}/api/v1/posts`
+export const BLOG_POSTS_API_ENDPOINT = "/api/v1/posts"
 
 export const toBlogImageUrl = (coverImagePath: string | null): string | null => {
   if (!coverImagePath) {
@@ -10,8 +8,14 @@ export const toBlogImageUrl = (coverImagePath: string | null): string | null => 
   }
 
   if (coverImagePath.startsWith("http://") || coverImagePath.startsWith("https://")) {
-    return coverImagePath
+    return toRelativeApiUrl(coverImagePath)
   }
 
-  return `${BLOG_ORIGIN}/storage/${coverImagePath.replace(/^\/+/, "")}`
+  const normalizedPath = coverImagePath.replace(/^\/+/, "")
+
+  if (normalizedPath.startsWith("storage/")) {
+    return `/${normalizedPath}`
+  }
+
+  return `/storage/${normalizedPath}`
 }

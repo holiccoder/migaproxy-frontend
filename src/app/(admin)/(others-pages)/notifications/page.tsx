@@ -1,7 +1,7 @@
 "use client";
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import { ENV } from "@/config/env";
+import { toRelativeApiUrl } from "@/config/env";
 import React, { useCallback, useEffect, useState } from "react";
 
 type NotificationData = {
@@ -68,8 +68,7 @@ export default function NotificationsPage() {
       setIsLoading(true);
       setErrorMessage(null);
 
-      const apiBaseUrl = ENV.API_BASE_URL;
-      let pageUrl: string | null = `${apiBaseUrl}/api/v1/notifications`;
+      let pageUrl: string | null = "/api/v1/notifications";
       const allNotifications: ApiNotification[] = [];
 
       while (pageUrl) {
@@ -88,7 +87,7 @@ export default function NotificationsPage() {
 
         const payload = (await response.json()) as NotificationsResponse;
         allNotifications.push(...(payload.data ?? []));
-        pageUrl = payload.next_page_url ?? null;
+        pageUrl = payload.next_page_url ? toRelativeApiUrl(payload.next_page_url) : null;
       }
 
       setNotifications(allNotifications);
@@ -121,8 +120,7 @@ export default function NotificationsPage() {
       );
 
       try {
-        const apiBaseUrl = ENV.API_BASE_URL;
-        await fetch(`${apiBaseUrl}/api/v1/notifications/${notificationId}/read`, {
+        await fetch(`/api/v1/notifications/${notificationId}/read`, {
           method: "POST",
           headers: {
             Accept: "application/json",

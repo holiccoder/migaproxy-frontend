@@ -1,7 +1,6 @@
 "use client";
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import { ENV } from "@/config/env";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -77,8 +76,6 @@ export default function PlaceOrderPage() {
   const [isPlacingOrder, setIsPlacingOrder] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const apiBaseUrl = ENV.API_BASE_URL;
-
   const planId = useMemo(() => {
     const rawPlanId = params?.planId;
 
@@ -121,7 +118,7 @@ export default function PlaceOrderPage() {
           ? Number(normalizedPlanId)
           : normalizedPlanId;
 
-        const response = await fetch(`${apiBaseUrl}/api/v1/orders`, {
+        const response = await fetch("/api/v1/orders", {
           method: "POST",
           headers: {
             Accept: "application/json",
@@ -160,7 +157,7 @@ export default function PlaceOrderPage() {
     };
 
     void placeOrder();
-  }, [apiBaseUrl, planId, router]);
+  }, [planId, router]);
 
   return (
     <div>

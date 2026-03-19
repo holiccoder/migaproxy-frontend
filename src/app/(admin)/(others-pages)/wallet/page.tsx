@@ -1,7 +1,6 @@
 "use client";
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import { ENV } from "@/config/env";
 import React, { useEffect, useState } from "react";
 
 type WalletResponse = {
@@ -52,8 +51,6 @@ export default function WalletPage() {
   const [withdrawNotes, setWithdrawNotes] = useState("");
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
   const [withdrawSuccess, setWithdrawSuccess] = useState<string | null>(null);
-
-  const apiBaseUrl = ENV.API_BASE_URL;
 
   const getAuthToken = (): string | null => {
     const localToken = localStorage.getItem("auth_token");
@@ -109,14 +106,14 @@ export default function WalletPage() {
         setErrorMessage(null);
 
         const [walletResponse, historyResponse] = await Promise.all([
-          fetch(`${apiBaseUrl}/api/v1/wallet`, {
+          fetch("/api/v1/wallet", {
             method: "GET",
             headers: {
               Accept: "application/json",
               Authorization: `Bearer ${token}`,
             },
           }),
-          fetch(`${apiBaseUrl}/api/v1/wallet/history?page=${currentPage}`, {
+          fetch(`/api/v1/wallet/history?page=${currentPage}`, {
             method: "GET",
             headers: {
               Accept: "application/json",
@@ -145,7 +142,7 @@ export default function WalletPage() {
     };
 
     void fetchWallet();
-  }, [apiBaseUrl, currentPage]);
+  }, [currentPage]);
 
   const handleRechargeSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
