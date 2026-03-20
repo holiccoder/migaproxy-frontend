@@ -3,7 +3,7 @@
 import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { Modal } from "@/components/ui/modal";
-import { ipmartApi } from "@/utils/api";
+import { type ApiResponse, ipmartApi } from "@/utils/api";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 const generatePassword = (): string => {
@@ -71,6 +71,19 @@ type ProxyOptionsResponse = {
 
 type ProxyOptionsApiResponse = {
   data?: ProxyOptionsResponse;
+};
+
+type GenerateTestLinkResponse = {
+  data?: {
+    test_link?: string;
+    link?: string;
+    url?: string;
+    links?: string[];
+  };
+  test_link?: string;
+  link?: string;
+  url?: string;
+  links?: string[];
 };
 
 type ToggleTranslationGroup = "protocol" | "proxyType" | "proxyFormat";
@@ -345,6 +358,26 @@ const getStoredProxyCredentials = (): StoredProxyCredentials => {
   };
 };
 
+const getStoredUserId = (): string => {
+  const storedUser = getStoredLoginResponseUser();
+
+  if (!storedUser) {
+    return "";
+  }
+
+  const rawUserId = storedUser.id;
+
+  if (typeof rawUserId === "number" && Number.isFinite(rawUserId)) {
+    return String(rawUserId);
+  }
+
+  if (typeof rawUserId === "string") {
+    return rawUserId.trim();
+  }
+
+  return "";
+};
+
 const syncStoredProxyPassword = (nextPassword: string): void => {
   if (typeof window === "undefined") {
     return;
@@ -415,6 +448,15 @@ const getAuthToken = (): string | null => {
   return decodeURIComponent(cookieValue);
 };
 
+const getSelectedOptionLabel = (
+  options: { value: string; label: string }[],
+  selectedValue: string,
+): string => {
+  const matchedOption = options.find((option) => option.value === selectedValue);
+
+  return matchedOption?.label ?? selectedValue;
+};
+
 export default function RotatingResidentialProxiesPage() {
   const storedProxyCredentials = useMemo(() => getStoredProxyCredentials(), []);
   const [proxyUsername] = useState(() => storedProxyCredentials.username);
@@ -435,7 +477,8 @@ export default function RotatingResidentialProxiesPage() {
   const [cityOptions, setCityOptions] = useState<{ value: string; label: string }[]>([]);
   const [loadingStates, setLoadingStates] = useState(false);
   const [loadingCities, setLoadingCities] = useState(false);
-  const [userBalance, setUserBalance] = useState<number>(0);
+  const [testCommand, setTestCommand] = useState("");
+  const [isRefreshingTestCommand, setIsRefreshingTestCommand] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -496,13 +539,6 @@ export default function RotatingResidentialProxiesPage() {
     }
   }, []);
 
-  const fetchUserBalance = useCallback(() => {
-    const storedUser = getStoredLoginResponseUser();
-    if (storedUser && typeof storedUser.balance === "number") {
-      setUserBalance(storedUser.balance);
-    }
-  }, []);
-
   const fetchStates = useCallback(async (countryCode: string) => {
     const token = getAuthToken();
     setLoadingStates(true);
@@ -549,27 +585,141 @@ export default function RotatingResidentialProxiesPage() {
 
   useEffect(() => {
     void fetchProxyOptions();
-    void fetchUserBalance();
-  }, [fetchProxyOptions, fetchUserBalance]);
+  }, [fetchProxyOptions]);
 
+  const selectedCountryName = useMemo(() => {
+    if (selectedLocation === "all") {
+      return "all";
+    }
 
-  const testCommand = useMemo(() => {
-    if (userBalance === 0) {
+    return getSelectedOptionLabel(countryOptions, selectedLocation);
+  }, [countryOptions, selectedLocation]);
+
+  const selectedStateName = useMemo(() => {
+    if (selectedState === "all") {
+      return "all";
+    }
+
+    return getSelectedOptionLabel(stateOptions, selectedState);
+  }, [selectedState, stateOptions]);
+
+  const selectedCityName = useMemo(() => {
+    if (selectedCity === "all") {
+      return "all";
+    }
+
+    return getSelectedOptionLabel(cityOptions, selectedCity);
+  }, [cityOptions, selectedCity]);
+
+  const selectedProtocolLabel = useMemo(() => {
+    if (!protocol) {
       return "";
     }
+
+    return getSelectedOptionLabel(protocolOptions, protocol);
+  }, [protocol, protocolOptions]);
+
+  const selectedProxyTypeLabel = useMemo(() => {
+    if (!proxyType) {
+      return "";
+    }
+
+    return getSelectedOptionLabel(proxyTypeOptions, proxyType);
+  }, [proxyType, proxyTypeOptions]);
+
+  const selectedProxyFormatLabel = useMemo(() => {
+    if (!proxyFormat) {
+      return "";
+    }
+
+    return getSelectedOptionLabel(proxyFormatOptions, proxyFormat);
+  }, [proxyFormat, proxyFormatOptions]);
+
+  const fallbackTestCommand = useMemo(() => {
     const locationValue = selectedLocation || "all";
     const userValue = proxyUsername || "username";
     const passwordValue = proxyPassword || "password";
-    const scheme = protocol.toLowerCase() === "socks5" ? "socks5" : "http";
+    const normalizedProtocol = selectedProtocolLabel.toLowerCase();
+    const scheme = normalizedProtocol.includes("socks") ? "socks5" : "http";
 
     return `curl -x ${scheme}://gateway.example.com:10000 -U ${userValue}:${passwordValue} "https://ipinfo.io?location=${locationValue}&type=${encodeURIComponent(
       proxyType
     )}&format=${proxyFormat}"`;
-  }, [selectedLocation, proxyUsername, proxyPassword, protocol, proxyType, proxyFormat, userBalance]);
+  }, [selectedLocation, proxyUsername, proxyPassword, selectedProtocolLabel, proxyType, proxyFormat]);
+
+  const refreshGeneratedTestLink = useCallback(async (): Promise<void> => {
+    const token = getAuthToken();
+    const userId = getStoredUserId();
+
+    if (!token || !protocol || !proxyType || !proxyFormat) {
+      setTestCommand(fallbackTestCommand);
+      return;
+    }
+
+    setIsRefreshingTestCommand(true);
+
+    try {
+      const response = (await ipmartApi.generateTestLink(
+        {
+          user_id: userId || undefined,
+          country_name: selectedCountryName,
+          state_name: selectedStateName,
+          city_name: selectedCityName,
+          protocol: protocol,
+          proxy_type: proxyType,
+          proxy_format: proxyFormat,
+          country_code: selectedLocation,
+          state_code: selectedState,
+          city_code: selectedCity,
+          protocol_name: selectedProtocolLabel,
+          proxy_type_name: selectedProxyTypeLabel,
+          proxy_format_name: selectedProxyFormatLabel,
+        },
+        token,
+      )) as ApiResponse<GenerateTestLinkResponse>;
+
+      const nextTestCommand =
+        response.data?.data?.test_link ??
+        response.data?.data?.link ??
+        response.data?.data?.url ??
+        response.data?.data?.links?.[0] ??
+        response.data?.test_link ??
+        response.data?.link ??
+        response.data?.url ??
+        response.data?.links?.[0] ??
+        fallbackTestCommand;
+
+      setTestCommand(nextTestCommand);
+    } catch {
+      setTestCommand(fallbackTestCommand);
+    } finally {
+      setIsRefreshingTestCommand(false);
+    }
+  }, [
+    fallbackTestCommand,
+    protocol,
+    proxyFormat,
+    proxyType,
+    selectedCity,
+    selectedCityName,
+    selectedCountryName,
+    selectedLocation,
+    selectedProtocolLabel,
+    selectedProxyFormatLabel,
+    selectedProxyTypeLabel,
+    selectedState,
+    selectedStateName,
+  ]);
+
+  useEffect(() => {
+    void refreshGeneratedTestLink();
+  }, [refreshGeneratedTestLink]);
+
+  const displayTestCommand = testCommand || fallbackTestCommand;
 
   const handleCopyCommand = async (): Promise<void> => {
     try {
-      await navigator.clipboard.writeText(testCommand);
+      await navigator.clipboard.writeText(displayTestCommand);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 1500);
     } catch {
@@ -862,15 +1012,16 @@ export default function RotatingResidentialProxiesPage() {
               <input
                 type="text"
                 readOnly
-                value={testCommand}
+                value={displayTestCommand}
                 className="h-11 min-w-0 flex-1 rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:outline-hidden dark:border-gray-700 dark:bg-gray-800 dark:text-white/90"
               />
               <button
                 type="button"
                 onClick={handleCopyCommand}
+                disabled={isRefreshingTestCommand}
                 className="inline-flex h-11 items-center justify-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
               >
-                {isCopied ? "copied" : "copy"}
+                {isRefreshingTestCommand ? "updating..." : isCopied ? "copied" : "copy"}
               </button>
             </div>
           </div>

@@ -125,6 +125,7 @@ export async function proxyRequestToBackend(request: NextRequest, targetPath: st
   const responseHeaders = cloneHeadersWithout(upstreamResponse.headers, HOP_BY_HOP_HEADERS);
   responseHeaders.delete("host");
   responseHeaders.delete("content-length");
+  responseHeaders.delete("content-encoding");
 
   return new Response(upstreamResponse.body, {
     status: upstreamResponse.status,

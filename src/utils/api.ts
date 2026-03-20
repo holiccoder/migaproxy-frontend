@@ -115,6 +115,33 @@ export const ipmartApi = {
     apiClient.get(`/v1/ipmart/proxy-cities?country_code=${encodeURIComponent(countryCode)}&state=${encodeURIComponent(state)}`, token),
   getProxyApiLink: (data: any, token?: string) =>
     apiClient.post("/v1/ipmart/proxy-api-link", data, token),
+  generateTestLink: (
+    params: Record<string, string | number | undefined>,
+    token?: string,
+  ) => {
+    const query = new URLSearchParams();
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === undefined || value === null) {
+        return;
+      }
+
+      const serializedValue = String(value).trim();
+
+      if (!serializedValue) {
+        return;
+      }
+
+      query.set(key, serializedValue);
+    });
+
+    const queryString = query.toString();
+
+    return apiClient.get(
+      `/v1/ipmart/generate-test-link${queryString ? `?${queryString}` : ""}`,
+      token,
+    );
+  },
   getProxyOptions: async (token?: string) => {
     const now = Date.now();
     // Check in-memory cache first
