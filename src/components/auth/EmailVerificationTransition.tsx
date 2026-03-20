@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -17,7 +18,7 @@ type VerifyEmailResponse = {
 const DASHBOARD_PATH = "/user/dashboard";
 const AUTH_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
-export default function DashboardEmailVerificationHandler() {
+export default function EmailVerificationTransition() {
   const searchParams = useSearchParams();
   const processedVerificationKeyRef = useRef<string | null>(null);
   const [status, setStatus] = useState<VerificationStatus>("idle");
@@ -30,6 +31,10 @@ export default function DashboardEmailVerificationHandler() {
 
   useEffect(() => {
     if (!verificationId || !verificationHash || !verificationExpires || !verificationSignature) {
+      setStatus("error");
+      setErrorMessage(
+        "Verification link is invalid or incomplete. Please request a new verification email.",
+      );
       return;
     }
 
@@ -79,9 +84,7 @@ export default function DashboardEmailVerificationHandler() {
 
         const tokenType = payload?.data?.token_type ?? "Bearer";
         const serializedLoginResponse = payload ? JSON.stringify(payload) : null;
-        const serializedUser = payload?.data?.user
-          ? JSON.stringify(payload.data.user)
-          : null;
+        const serializedUser = payload?.data?.user ? JSON.stringify(payload.data.user) : null;
         const isSecureContext = window.location.protocol === "https:";
 
         if (serializedLoginResponse) {
@@ -117,28 +120,36 @@ export default function DashboardEmailVerificationHandler() {
     };
 
     void verifyEmail();
-  }, [
-    verificationExpires,
-    verificationHash,
-    verificationId,
-    verificationSignature,
-  ]);
+  }, [verificationExpires, verificationHash, verificationId, verificationSignature]);
 
-  if (status === "verifying") {
-    return (
-      <div className="rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-200">
-        Verifying your email and signing you in...
+  const statusMessage =
+    status === "verifying"
+      ? "Verifying your email and signing you in..."
+      : status === "error"
+      ? errorMessage
+      : "Preparing email verification...";
+
+  return (
+    <div className="flex w-full flex-1 items-center justify-center px-6 py-10 lg:w-3/5">
+      <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Email Verification</h1>
+        <p
+          className={`mt-3 text-sm ${
+            status === "error" ? "text-error-500 dark:text-error-400" : "text-gray-600 dark:text-gray-300"
+          }`}
+        >
+          {statusMessage}
+        </p>
+
+        {status === "error" ? (
+          <Link
+            href="/login"
+            className="mt-5 inline-flex rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-white"
+          >
+            Go to login
+          </Link>
+        ) : null}
       </div>
-    );
-  }
-
-  if (status === "error" && errorMessage) {
-    return (
-      <div className="rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-200">
-        {errorMessage}
-      </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 }

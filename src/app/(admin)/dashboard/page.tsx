@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import DashboardEmailVerificationHandler from "@/components/auth/DashboardEmailVerificationHandler";
 import DashboardLatestActivity from "@/components/dashboard/DashboardLatestActivity";
 import DashboardTrafficHistoryChart from "@/components/dashboard/DashboardTrafficHistoryChart";
 import DashboardWalletBalanceCard from "@/components/dashboard/DashboardWalletBalanceCard";
@@ -13,8 +12,6 @@ export const metadata: Metadata = {
 export default function Ecommerce() {
   return (
     <div className="space-y-6">
-      <DashboardEmailVerificationHandler />
-
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <section className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] xl:col-span-2">
           <div className="px-6 py-5">

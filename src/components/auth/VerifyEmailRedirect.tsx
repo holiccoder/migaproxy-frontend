@@ -9,10 +9,12 @@ export default function VerifyEmailRedirect() {
 
   useEffect(() => {
     const serializedQuery = searchParams.toString();
-    const destination = serializedQuery ? `/dashboard?${serializedQuery}` : "/dashboard";
+    const destination = serializedQuery
+      ? `/email-verification?${serializedQuery}`
+      : "/email-verification";
 
     router.replace(destination);
   }, [router, searchParams]);
 
-  return <div className="px-4 py-10 text-sm text-gray-500">Redirecting to dashboard...</div>;
+  return <div className="px-4 py-10 text-sm text-gray-500">Redirecting to email verification...</div>;
 }

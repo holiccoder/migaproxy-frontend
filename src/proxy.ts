@@ -17,8 +17,6 @@ const AUTH_PROTECTED_PATH_PREFIXES = [
   "/user",
 ] as const;
 
-const EMAIL_VERIFICATION_QUERY_KEYS = ["id", "hash", "expires", "signature"] as const;
-
 const hasPathPrefix = (pathname: string, pathPrefix: string): boolean => {
   return pathname === pathPrefix || pathname.startsWith(`${pathPrefix}/`);
 };
@@ -36,14 +34,6 @@ const isAuthProtectedPath = (pathname: string): boolean => {
   return AUTH_PROTECTED_PATH_PREFIXES.some((pathPrefix) =>
     hasPathPrefix(pathname, pathPrefix),
   );
-};
-
-const hasEmailVerificationPayload = (request: NextRequest): boolean => {
-  return EMAIL_VERIFICATION_QUERY_KEYS.every((queryKey) => {
-    const queryValue = request.nextUrl.searchParams.get(queryKey);
-
-    return queryValue !== null && queryValue.trim() !== "";
-  });
 };
 
 export function proxy(request: NextRequest): NextResponse {
@@ -70,10 +60,6 @@ export function proxy(request: NextRequest): NextResponse {
   const isUserPath = hasPathPrefix(pathname, USER_PATH_PREFIX);
   const normalizedPathname = isUserPath ? removeUserPrefix(pathname) : pathname;
   const isProtectedPath = isAuthProtectedPath(normalizedPathname);
-  const isDashboardEmailVerificationRequest =
-    request.method === "GET" &&
-    normalizedPathname === "/dashboard" &&
-    hasEmailVerificationPayload(request);
 
   if (!isUserPath && isProtectedPath) {
     const redirectUrl = request.nextUrl.clone();
@@ -81,7 +67,7 @@ export function proxy(request: NextRequest): NextResponse {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (isProtectedPath && !isAuthenticated && !isDashboardEmailVerificationRequest) {
+  if (isProtectedPath && !isAuthenticated) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     redirectUrl.searchParams.set("redirect", withUserPrefix(normalizedPathname));
