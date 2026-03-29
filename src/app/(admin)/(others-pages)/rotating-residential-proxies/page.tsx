@@ -86,28 +86,46 @@ type GenerateTestLinkResponse = {
   links?: string[];
 };
 
+type UserProfileResponse = Record<string, unknown> & {
+  data?: (Record<string, unknown> & {
+    user?: Record<string, unknown>;
+  }) | null;
+};
+
 type ToggleTranslationGroup = "protocol" | "proxyType" | "proxyFormat";
 
 type ToggleTranslationCache = Record<string, string>;
 
 const TOGGLE_TRANSLATION_CACHE_KEY = "ipmart_toggle_translation_cache_v1";
 const CHINESE_CHARACTER_PATTERN = /[\u3400-\u9FFF]/u;
+const AVAILABLE_TRAFFIC_FIELDS = [
+  "available_traffic",
+  "availableTraffic",
+  "traffic_available",
+  "trafficAvailable",
+  "remaining_traffic",
+  "remainingTraffic",
+  "traffic_left",
+  "trafficLeft",
+  "left_traffic",
+  "leftTraffic",
+] as const;
 
 let cachedToggleTranslations: ToggleTranslationCache | null = null;
 
 const KNOWN_TOGGLE_TRANSLATIONS: Record<string, string> = {
   "http协议": "HTTP",
   "socks5协议": "SOCKS5",
-  "轮转": "Rotating",
-  "轮换": "Rotating",
-  "按次轮换": "Rotate Every Request",
+  "轮转": "Switch IP per request",
+  "轮换": "Switch IP per request",
+  "按次轮换": "Switch IP per request",
   "按会话轮换": "Sticky Session",
-  "粘性": "Sticky",
-  "长效会话": "Long Session",
+  "粘性": "Sticky 5-30 min",
+  "长效会话": "1-6 hours",
   "短效会话": "Short Session",
-  "文本": "Text",
-  "文本格式": "Text",
-  "json格式": "JSON",
+  "文本": "SERVER:PORT:USERNAME:PASSWORD",
+  "文本格式": "SERVER:PORT:USERNAME:PASSWORD",
+  "json格式": "USERNAME:PASSWORD@SERVER:PORT",
 };
 
 const normalizeTranslationLookupKey = (value: string): string => {
@@ -193,14 +211,34 @@ const inferToggleLabelFromGroup = (
 
   if (group === "proxyType") {
     if (normalizedCode === "0") {
-      return "Rotating";
+      return "Switch IP per request";
     }
 
     if (normalizedCode === "1") {
-      return "Sticky 5-30 Minutes";
+      return "Sticky 5-30 min";
+    }
+
+    if (normalizedCode === "2") {
+      return "1-6 hours";
     }
 
     return `Mode ${code}`;
+  }
+
+  if (group === "proxyFormat") {
+    if (normalizedCode === "0") {
+      return "SERVER:PORT:USERNAME:PASSWORD";
+    }
+
+    if (normalizedCode === "1") {
+      return "USERNAME:PASSWORD@SERVER:PORT";
+    }
+
+    if (normalizedCode === "2") {
+      return "SERVER|PORT|USERNAME|PASSWORD";
+    }
+
+    return `Format ${code}`;
   }
 
   if (normalizedCode === "1" || normalizedCode === "json") {
@@ -378,6 +416,75 @@ const getStoredUserId = (): string => {
   return "";
 };
 
+const toRecord = (value: unknown): Record<string, unknown> | null => {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  return value as Record<string, unknown>;
+};
+
+const getAvailableTrafficValue = (record: Record<string, unknown> | null): unknown => {
+  if (!record) {
+    return undefined;
+  }
+
+  for (const field of AVAILABLE_TRAFFIC_FIELDS) {
+    const fieldValue = record[field];
+
+    if (fieldValue !== undefined && fieldValue !== null) {
+      return fieldValue;
+    }
+  }
+
+  return undefined;
+};
+
+const formatAvailableTraffic = (value: unknown): string | null => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return `${value.toLocaleString(undefined, { maximumFractionDigits: 2 })} GB`;
+  }
+
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return null;
+  }
+
+  if (/^[+-]?\d+(\.\d+)?$/.test(trimmedValue)) {
+    const parsedValue = Number(trimmedValue);
+
+    if (Number.isFinite(parsedValue)) {
+      return `${parsedValue.toLocaleString(undefined, { maximumFractionDigits: 2 })} GB`;
+    }
+  }
+
+  return trimmedValue;
+};
+
+const getAvailableTrafficFromUserPayload = (
+  payload: UserProfileResponse | null,
+): string | null => {
+  if (!payload) {
+    return null;
+  }
+
+  const payloadRecord = toRecord(payload);
+  const payloadData = toRecord(payloadRecord?.data);
+  const payloadUser = toRecord(payloadData?.user);
+
+  const availableTrafficValue =
+    getAvailableTrafficValue(payloadRecord) ??
+    getAvailableTrafficValue(payloadData) ??
+    getAvailableTrafficValue(payloadUser);
+
+  return formatAvailableTraffic(availableTrafficValue);
+};
+
 const syncStoredProxyPassword = (nextPassword: string): void => {
   if (typeof window === "undefined") {
     return;
@@ -485,6 +592,7 @@ export default function RotatingResidentialProxiesPage() {
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [passwordUpdateError, setPasswordUpdateError] = useState<string | null>(null);
   const [passwordUpdateSuccess, setPasswordUpdateSuccess] = useState<string | null>(null);
+  const [availableTraffic, setAvailableTraffic] = useState("0 GB");
 
   const fetchProxyOptions = useCallback(async () => {
     const token = getAuthToken();
@@ -583,9 +691,46 @@ export default function RotatingResidentialProxiesPage() {
     }
   }, []);
 
+  const fetchAvailableTraffic = useCallback(async (): Promise<void> => {
+    const token = getAuthToken();
+
+    if (!token) {
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/user", {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const payload = (await response
+        .json()
+        .catch(() => null)) as UserProfileResponse | null;
+      const nextAvailableTraffic = getAvailableTrafficFromUserPayload(payload);
+
+      if (nextAvailableTraffic) {
+        setAvailableTraffic(nextAvailableTraffic);
+      }
+    } catch {
+      return;
+    }
+  }, []);
+
   useEffect(() => {
     void fetchProxyOptions();
   }, [fetchProxyOptions]);
+
+  useEffect(() => {
+    void fetchAvailableTraffic();
+  }, [fetchAvailableTraffic]);
 
   const selectedCountryName = useMemo(() => {
     if (selectedLocation === "all") {
@@ -818,7 +963,7 @@ export default function RotatingResidentialProxiesPage() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]">
             <p className="text-xs uppercase text-gray-500 dark:text-gray-400">Available Traffic</p>
-            <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">0 GB</p>
+            <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">{availableTraffic}</p>
           </div>
 
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]">

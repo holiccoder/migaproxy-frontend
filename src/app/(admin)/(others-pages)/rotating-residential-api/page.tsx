@@ -44,7 +44,7 @@ export default function RotatingResidentialApiPage() {
   const [link, setLink] = useState("");
   const [copied, setCopied] = useState(false);
   const [allowlistIp, setAllowlistIp] = useState("");
-  const [generatingLink, setGeneratingLink] = useState(false);
+  const [isFetchingIpList, setIsFetchingIpList] = useState(false);
 
   const fetchProxyOptions = useCallback(async () => {
     const token = getAuthToken();
@@ -128,34 +128,102 @@ export default function RotatingResidentialApiPage() {
     }
   };
 
-  const handleGenerateLink = async (): Promise<void> => {
-    const token = getAuthToken();
-    setGeneratingLink(true);
-    try {
-      const response = await ipmartApi.getProxyApiLink(
-        {
-          cntryCode: location === "all" ? undefined : location,
-          stateName: selectedState === "all" ? undefined : selectedState,
-          cityName: selectedCity === "all" ? undefined : selectedCity,
-          format: extractFormat,
-          num: Math.max(1, quantity),
-          time: Math.max(5, duration),
-        },
-        token ?? undefined,
-      );
-      const raw = response.data as any;
-      const generatedUrl = raw?.data?.link ?? raw?.data?.url ?? raw?.link ?? raw?.url ?? "";
-      if (generatedUrl) {
-        setLink(generatedUrl);
-      } else {
-        setLink(generatedLink);
+  const fetchIpList = useCallback(
+    async (countryCode: string): Promise<void> => {
+      const token = getAuthToken();
+
+      if (!token) {
+        setLink("");
+        return;
       }
-    } catch {
-      setLink(generatedLink);
-    } finally {
-      setGeneratingLink(false);
+
+      setIsFetchingIpList(true);
+
+      try {
+        const response = await fetch("/api/v1/ipmart/proxy-api-link", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            cntryCode: countryCode,
+            stateName: selectedState === "all" ? undefined : selectedState,
+            cityName: selectedCity === "all" ? undefined : selectedCity,
+            format: extractFormat === "txt" ? "1" : "2",
+            num: Math.max(1, quantity),
+            time: Math.max(5, duration),
+          }),
+        });
+
+        const text = await response.text();
+
+        if (!response.ok || !text.trim()) {
+          setLink("");
+          return;
+        }
+
+        const trimmedText = text.trim();
+
+        try {
+          const payload = JSON.parse(trimmedText) as Record<string, unknown>;
+          const responseData =
+            payload && typeof payload.data === "object"
+              ? (payload.data as Record<string, unknown>)
+              : payload;
+
+          if (!responseData) {
+            setLink("");
+            return;
+          }
+
+          const ipsValue = responseData.ips;
+
+          if (Array.isArray(ipsValue)) {
+            const ipList = ipsValue
+              .filter((value): value is string => typeof value === "string")
+              .join("\n");
+
+            setLink(ipList);
+            return;
+          }
+
+          const linkValue = responseData.link;
+
+          if (typeof linkValue === "string" && linkValue.trim()) {
+            setLink(linkValue);
+            return;
+          }
+
+          const urlValue = responseData.url;
+
+          if (typeof urlValue === "string" && urlValue.trim()) {
+            setLink(urlValue);
+            return;
+          }
+
+          setLink(JSON.stringify(responseData, null, 2));
+        } catch {
+          setLink(trimmedText);
+        }
+      } catch {
+        setLink("");
+      } finally {
+        setIsFetchingIpList(false);
+      }
+    },
+    [duration, extractFormat, quantity, selectedState, selectedCity],
+  );
+
+  useEffect(() => {
+    if (location === "all") {
+      setLink("");
+      return;
     }
-  };
+
+    void fetchIpList(location);
+  }, [fetchIpList, location, selectedState, selectedCity, extractFormat, quantity, duration]);
 
   return (
     <div className="space-y-6">
@@ -276,45 +344,31 @@ export default function RotatingResidentialApiPage() {
             />
           </div>
 
-          <div className="grid items-center gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
+          <div className="grid items-start gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
             <label className="text-sm font-bold text-gray-700 dark:text-gray-300">
-              Link
+              IP List
             </label>
-            <div className="flex flex-wrap items-center gap-2">
-              <input
-                type="text"
+            <div className="space-y-3">
+              <textarea
                 value={link}
                 onChange={(event) => setLink(event.target.value)}
-                placeholder={generatedLink}
-                className="h-11 min-w-0 flex-1 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+                rows={4}
+                className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
               />
 
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={handleCopy}
+                  disabled={isFetchingIpList}
                   className="inline-flex h-11 items-center justify-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
                 >
                   {copied ? "copied" : "copy"}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => void handleGenerateLink()}
-                  disabled={generatingLink}
-                  className="inline-flex h-11 items-center justify-center rounded-lg bg-brand-500 px-4 text-sm font-medium text-white hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {generatingLink ? "generating..." : "generate link"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => window.open(link || generatedLink, "_blank", "noopener,noreferrer")}
-                  className="inline-flex h-11 items-center justify-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
-                >
-                  get
-                </button>
               </div>
             </div>
           </div>
+
         </form>
       </ComponentCard>
 
