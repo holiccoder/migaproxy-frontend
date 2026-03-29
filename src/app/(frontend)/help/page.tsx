@@ -60,7 +60,7 @@ export default function HelpCenterPage() {
       <section className="container mx-auto px-4 lg:px-8 pt-28 pb-20 lg:pt-36 lg:pb-28">
         <nav className="text-sm text-muted-foreground mb-6">
           <Link href="/" className="hover:text-foreground transition-colors">
-            GoProxy
+            MigaProxy
           </Link>
           <span className="mx-2">/</span>
           <span className="text-foreground">Help Center</span>
@@ -71,7 +71,7 @@ export default function HelpCenterPage() {
             Help Center
           </h1>
           <p className="text-lg text-muted-foreground mb-8">
-            Find answers, guides, and best practices for using GoProxy.
+            Find answers, guides, and best practices for using MigaProxy.
           </p>
           <input
             type="search"

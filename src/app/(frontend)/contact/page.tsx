@@ -15,7 +15,7 @@ export default function ContactPage() {
         <div className="max-w-5xl mx-auto">
           <nav className="text-sm text-muted-foreground mb-6">
             <Link href="/" className="hover:text-foreground transition-colors">
-              GoProxy
+              MigaProxy
             </Link>
             <span className="mx-2">/</span>
             <span className="text-foreground">Contact</span>
@@ -113,7 +113,7 @@ export default function ContactPage() {
               <div className="space-y-3 text-sm text-muted-foreground">
                 <div>
                   <p className="text-foreground font-medium">Email</p>
-                  <p>support@goproxy.com</p>
+                  <p>support@migaproxy.com</p>
                 </div>
                 <div>
                   <p className="text-foreground font-medium">WhatsApp</p>

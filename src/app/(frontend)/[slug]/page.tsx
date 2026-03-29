@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: CmsPageProps): Promise<Metada
 
   if (!page) {
     return createPageMetadata({
-      title: "Page Not Found | GoProxy",
+      title: "Page Not Found | MigaProxy",
       description: "The requested page could not be found.",
       path: `/${encodeURIComponent(slug)}`,
       noIndex: true,
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: CmsPageProps): Promise<Metada
   return createPageMetadata({
     title: page.seo?.title?.trim() || page.title,
     description:
-      page.seo?.description?.trim() || `Learn more about ${page.title} on GoProxy.`,
+      page.seo?.description?.trim() || `Learn more about ${page.title} on MigaProxy.`,
     path: `/${encodeURIComponent(slug)}`,
   });
 }
@@ -56,7 +56,7 @@ export default async function CmsPage({ params }: CmsPageProps) {
       <section className="container mx-auto px-4 lg:px-8 pt-28 pb-20 lg:pt-36 lg:pb-28">
         <nav className="mb-6 text-sm text-muted-foreground">
           <Link href="/" className="transition-colors hover:text-foreground">
-            GoProxy
+            MigaProxy
           </Link>
           <span className="mx-2">/</span>
           <span className="text-foreground">{page.title}</span>

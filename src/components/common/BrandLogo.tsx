@@ -19,7 +19,7 @@ export default function BrandLogo({
   width,
   height,
   className,
-  alt = "GoProxy Logo",
+  alt = "MigaProxy Logo",
   priority = false,
 }: BrandLogoProps) {
   const [logoUrl, setLogoUrl] = useState<string>(getFallbackFrontendLogoUrl())

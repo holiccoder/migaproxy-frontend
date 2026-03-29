@@ -70,7 +70,8 @@ export function proxy(request: NextRequest): NextResponse {
   if (isProtectedPath && !isAuthenticated) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
-    redirectUrl.searchParams.set("redirect", withUserPrefix(normalizedPathname));
+    const redirectPath = `${withUserPrefix(normalizedPathname)}${request.nextUrl.search}`;
+    redirectUrl.searchParams.set("redirect", redirectPath);
     return NextResponse.redirect(redirectUrl);
   }
 

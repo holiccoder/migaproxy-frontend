@@ -88,7 +88,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         <div className="relative z-10 container mx-auto px-4 lg:px-8 pt-28 pb-20 lg:pt-36 lg:pb-28">
           <nav className="text-sm text-muted-foreground mb-6">
             <Link href="/" className="hover:text-foreground transition-colors">
-              GoProxy
+              MigaProxy
             </Link>
             <span className="mx-2">/</span>
             <span className="text-foreground">Blog</span>
@@ -96,7 +96,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-4">
-              GoProxy Blog
+              MigaProxy Blog
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground mb-10">
               A one-stop hub for proxy insights, industry trends, best
@@ -107,7 +107,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             <div className="relative">
               <input
                 type="search"
-                placeholder="Search GoProxy Blog"
+                placeholder="Search MigaProxy Blog"
                 className="mx-auto w-full max-w-2xl rounded-full border border-border bg-card/70 px-6 py-4 text-base text-foreground placeholder:text-muted-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>

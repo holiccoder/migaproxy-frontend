@@ -2,19 +2,30 @@
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { ENV } from "@/config/env";
+import Image from "next/image";
+import QRCode from "qrcode";
 import React, { useEffect, useMemo, useState } from "react";
 
 type AffiliateDashboardResponse = {
   data?: {
+    commission_value?: number | string | null;
     affiliate?: {
       id: number;
       code: string;
       name?: string | null;
+      commission_value?: number | string | null;
+      commission_rate?: number | string | null;
+      commission_percentage?: number | string | null;
+      commission?: number | string | null;
     };
     stats?: {
       clicks_count?: number;
       conversions_count?: number;
       conversion_rate?: number;
+      commission_value?: number | string | null;
+      commission_rate?: number | string | null;
+      commission_percentage?: number | string | null;
+      commission?: number | string | null;
       pending_commission?: number;
       available_to_withdraw?: number;
       minimum_threshold?: number;
@@ -63,6 +74,50 @@ const money = (value: number): string => {
   return `$${(value / 100).toFixed(2)}`;
 };
 
+const parsePercentageValue = (...values: unknown[]): number | null => {
+  for (const value of values) {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      if (value > 0 && value < 1) {
+        return value * 100;
+      }
+
+      return value;
+    }
+
+    if (typeof value !== "string") {
+      continue;
+    }
+
+    const trimmedValue = value.trim();
+
+    if (!trimmedValue) {
+      continue;
+    }
+
+    const hasPercentSuffix = trimmedValue.endsWith("%");
+    const normalizedNumericValue = hasPercentSuffix
+      ? trimmedValue.slice(0, -1).trim()
+      : trimmedValue;
+    const parsedNumber = Number(normalizedNumericValue);
+
+    if (!Number.isFinite(parsedNumber)) {
+      continue;
+    }
+
+    if (hasPercentSuffix) {
+      return parsedNumber;
+    }
+
+    if (parsedNumber > 0 && parsedNumber < 1) {
+      return parsedNumber * 100;
+    }
+
+    return parsedNumber;
+  }
+
+  return null;
+};
+
 const formatDate = (value: string | null | undefined): string => {
   if (!value) {
     return "-";
@@ -103,6 +158,7 @@ export default function AffiliatePage() {
   const [clicksCount, setClicksCount] = useState(0);
   const [totalReferrals, setTotalReferrals] = useState(0);
   const [conversionRate, setConversionRate] = useState(0);
+  const [commissionRate, setCommissionRate] = useState(0);
   const [pendingCommission, setPendingCommission] = useState(0);
   const [availableToWithdraw, setAvailableToWithdraw] = useState(0);
   const [minimumThreshold, setMinimumThreshold] = useState(5000);
@@ -117,6 +173,9 @@ export default function AffiliatePage() {
   const [deepLinkInput, setDeepLinkInput] = useState("");
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const [autoTransferEnabled, setAutoTransferEnabled] = useState(false);
+  const [affiliateLinkQrCode, setAffiliateLinkQrCode] = useState<string | null>(null);
+  const [affiliateLinkQrError, setAffiliateLinkQrError] = useState<string | null>(null);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   const appBaseUrl = ENV.APP_BASE_URL;
 
@@ -201,6 +260,47 @@ export default function AffiliatePage() {
   }, [autoTransferEnabled]);
 
   useEffect(() => {
+    if (!baseReferralLink) {
+      setAffiliateLinkQrCode(null);
+      setAffiliateLinkQrError(null);
+      setIsQrModalOpen(false);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const createAffiliateLinkQrCode = async (): Promise<void> => {
+      try {
+        const generatedQrCode = await QRCode.toDataURL(baseReferralLink, {
+          errorCorrectionLevel: "M",
+          margin: 1,
+          width: 280,
+        });
+
+        if (isCancelled) {
+          return;
+        }
+
+        setAffiliateLinkQrCode(generatedQrCode);
+        setAffiliateLinkQrError(null);
+      } catch {
+        if (isCancelled) {
+          return;
+        }
+
+        setAffiliateLinkQrCode(null);
+        setAffiliateLinkQrError("Unable to generate QR code right now.");
+      }
+    };
+
+    void createAffiliateLinkQrCode();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [baseReferralLink]);
+
+  useEffect(() => {
     const fetchDashboard = async (): Promise<void> => {
       const token = getAuthToken();
 
@@ -226,14 +326,30 @@ export default function AffiliatePage() {
 
         if (!response.ok) {
           setErrorMessage(payload?.message ?? "Unable to load affiliate dashboard.");
+          setCommissionRate(0);
           return;
         }
 
-        const stats = payload?.data?.stats;
-        setAffiliateCode(payload?.data?.affiliate?.code ?? "");
+        const dashboardData = payload?.data;
+        const stats = dashboardData?.stats;
+        const affiliate = dashboardData?.affiliate;
+        setAffiliateCode(affiliate?.code ?? "");
         setClicksCount(stats?.clicks_count ?? 0);
         setTotalReferrals(stats?.conversions_count ?? 0);
         setConversionRate(stats?.conversion_rate ?? 0);
+        setCommissionRate(
+          parsePercentageValue(
+            dashboardData?.commission_value,
+            stats?.commission_value,
+            affiliate?.commission_value,
+            stats?.commission_rate,
+            stats?.commission_percentage,
+            stats?.commission,
+            affiliate?.commission_rate,
+            affiliate?.commission_percentage,
+            affiliate?.commission,
+          ) ?? 0,
+        );
         setPendingCommission(stats?.pending_commission ?? 0);
         setAvailableToWithdraw(stats?.available_to_withdraw ?? 0);
         setMinimumThreshold(stats?.minimum_threshold ?? 5000);
@@ -241,6 +357,7 @@ export default function AffiliatePage() {
         setPayoutHistory(payload?.data?.payout_history ?? []);
       } catch {
         setErrorMessage("Unable to load affiliate dashboard.");
+        setCommissionRate(0);
       } finally {
         setIsLoading(false);
       }
@@ -305,11 +422,19 @@ export default function AffiliatePage() {
 
       {!isLoading && !errorMessage ? (
         <div className="space-y-6">
-          <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
             <article className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
               <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Referrals</p>
               <p className="mt-2 text-2xl font-bold text-gray-800 dark:text-white/90">{totalReferrals}</p>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{clicksCount} tracked clicks</p>
+            </article>
+
+            <article className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+              <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Your Commission rate</p>
+              <p className="mt-2 text-2xl font-bold text-brand-700 dark:text-brand-300">
+                {`${commissionRate.toFixed(2)}%`}
+              </p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">applied on eligible conversions</p>
             </article>
 
             <article className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
@@ -336,22 +461,43 @@ export default function AffiliatePage() {
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Referral Toolkit</h3>
 
               <div className="mt-4 rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-500/30 dark:bg-brand-500/10">
-                <p className="text-xs uppercase tracking-wider text-brand-600 dark:text-brand-300">Your Unique Link</p>
-                <div className="mt-2 flex flex-col gap-2 md:flex-row">
-                  <input
-                    readOnly
-                    value={baseReferralLink}
-                    className="h-10 w-full rounded-lg border border-brand-200 bg-white px-3 text-sm text-gray-700 dark:border-brand-500/30 dark:bg-gray-900 dark:text-gray-200"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      void copyToClipboard(baseReferralLink, "Link");
-                    }}
-                    className="inline-flex h-10 items-center justify-center rounded-lg bg-brand-500 px-4 text-sm font-medium text-white hover:bg-brand-600"
-                  >
-                    Copy Link
-                  </button>
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-brand-600 dark:text-brand-300">Your Unique Link</p>
+                  <div className="mt-2 flex flex-col gap-2 md:flex-row md:items-center">
+                    <input
+                      readOnly
+                      value={baseReferralLink}
+                      className="h-10 w-full rounded-lg border border-brand-200 bg-white px-3 text-sm text-gray-700 dark:border-brand-500/30 dark:bg-gray-900 dark:text-gray-200 md:flex-1"
+                    />
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void copyToClipboard(baseReferralLink, "Link");
+                        }}
+                        className="inline-flex h-10 items-center justify-center rounded-lg bg-brand-500 px-4 text-sm font-medium text-white hover:bg-brand-600"
+                      >
+                        Copy
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={!affiliateLinkQrCode || Boolean(affiliateLinkQrError)}
+                        title={affiliateLinkQrError ?? "Show affiliate QR code"}
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                        }}
+                        onClick={(event) => {
+                          event.currentTarget.blur();
+                          setIsQrModalOpen(true);
+                        }}
+                        className="inline-flex h-10 items-center justify-center rounded-lg bg-brand-500 px-4 text-sm font-medium text-white hover:bg-brand-600 focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        QR Code
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -398,21 +544,21 @@ export default function AffiliatePage() {
 
               <div className="mt-4 grid grid-cols-1 gap-2">
                 <a
-                  href="/images/logo/logo.svg"
+                  href="/images/logo/logo.png"
                   download
                   className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
                 >
                   Download Logo (Light)
                 </a>
                 <a
-                  href="/images/logo/logo-dark.svg"
+                  href="/images/logo/logo-dark.png"
                   download
                   className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
                 >
                   Download Logo (Dark)
                 </a>
                 <a
-                  href="/images/logo/logo-icon.svg"
+                  href="/images/logo/logo-icon.png"
                   download
                   className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
                 >
@@ -642,6 +788,62 @@ export default function AffiliatePage() {
               ) : null}
             </article>
           </section>
+        </div>
+      ) : null}
+
+      {isQrModalOpen ? (
+        <div
+          className="fixed inset-0 z-[120] flex items-center justify-center px-4"
+          onClick={() => {
+            setIsQrModalOpen(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="affiliate-qr-modal-title"
+            className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-5 shadow-xl dark:border-gray-700 dark:bg-gray-900"
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            <div className="flex items-start justify-between">
+              <h3 id="affiliate-qr-modal-title" className="text-base font-semibold text-gray-900 dark:text-white/90">
+                Affiliate QR Code
+              </h3>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsQrModalOpen(false);
+                }}
+                className="rounded-md border border-gray-300 px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-4 flex flex-col items-center">
+              {affiliateLinkQrCode ? (
+                <Image
+                  src={affiliateLinkQrCode}
+                  alt="QR code for your affiliate link"
+                  width={280}
+                  height={280}
+                  unoptimized
+                  className="h-56 w-56 rounded-md border border-gray-200 dark:border-gray-700"
+                />
+              ) : (
+                <div className="flex h-56 w-56 items-center justify-center rounded-md border border-dashed border-gray-300 px-4 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                  {affiliateLinkQrError ?? "Generating QR..."}
+                </div>
+              )}
+
+              <p className="mt-3 text-sm text-gray-700 dark:text-gray-300">
+                Scan to visit your affiliate link
+              </p>
+            </div>
+          </div>
         </div>
       ) : null}
     </div>

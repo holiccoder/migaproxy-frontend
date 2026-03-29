@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: BlogDetailPageProps): Promise
 
   if (!response?.data) {
     return createPageMetadata({
-      title: "Blog Article Not Found | GoProxy",
+      title: "Blog Article Not Found | MigaProxy",
       description: "The requested blog article could not be found.",
       path: `/blog/${encodeURIComponent(slug)}`,
       noIndex: true,
@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: BlogDetailPageProps): Promise
   const post = response.data;
 
   return createPageMetadata({
-    title: `${post.title} | GoProxy Blog`,
+    title: `${post.title} | MigaProxy Blog`,
     description:
       post.seo?.description?.trim()
       || post.excerpt?.trim()
@@ -94,7 +94,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
       <section className="container mx-auto px-4 lg:px-8 pt-28 pb-10 lg:pt-36">
         <nav className="text-sm text-muted-foreground">
           <Link href="/" className="hover:text-foreground transition-colors">
-            GoProxy
+            MigaProxy
           </Link>
           <span className="mx-2">/</span>
           <Link href="/blog" className="hover:text-foreground transition-colors">

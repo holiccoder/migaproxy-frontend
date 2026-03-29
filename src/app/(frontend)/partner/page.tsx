@@ -106,7 +106,7 @@ export default function PartnerPage() {
       <section className="container mx-auto px-4 lg:px-8 pt-28 pb-20 lg:pt-36 lg:pb-28">
         <nav className="text-sm text-muted-foreground mb-6">
           <Link href="/" className="hover:text-foreground transition-colors">
-            GoProxy
+            MigaProxy
           </Link>
           <span className="mx-2">/</span>
           <span className="text-foreground">Partner</span>
@@ -117,7 +117,7 @@ export default function PartnerPage() {
             Partner Program
           </h1>
           <p className="text-lg text-muted-foreground">
-            Collaborate with GoProxy to unlock growth opportunities through referrals, integrations, and strategic partnerships.
+            Collaborate with MigaProxy to unlock growth opportunities through referrals, integrations, and strategic partnerships.
           </p>
         </div>
 

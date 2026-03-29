@@ -2,7 +2,7 @@ import { toRelativeApiUrl } from "@/config/env"
 import { apiGet } from "@/lib/api"
 
 const BRANDING_SETTINGS_API_ENDPOINT = "/api/v1/settings/branding"
-const FALLBACK_FRONTEND_LOGO_URL = "/images/logo/logo.svg"
+const FALLBACK_FRONTEND_LOGO_URL = "/images/logo/logo.png"
 const FALLBACK_FRONTEND_FAVICON_URL = "/favicon.ico"
 const BRANDING_SETTINGS_CACHE_TTL_IN_MS = 60_000
 

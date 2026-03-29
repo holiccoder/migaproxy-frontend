@@ -2,6 +2,7 @@
 
 import BrandLogo from "@/components/common/BrandLogo";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import { getStoredAffiliateCode } from "@/lib/affiliate-attribution";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import React, { FormEvent, useEffect, useMemo, useState } from "react";
@@ -64,7 +65,7 @@ type WalletResponse = {
 
 type PaymentMethod = "wallet" | "credit_card" | "paypal" | "alipay" | "wechat_pay";
 
-const SUPPORT_EMAILS = ["support@goproxy.com", "billing@goproxy.com"] as const;
+const SUPPORT_EMAILS = ["support@migaproxy.com", "billing@migaproxy.com"] as const;
 
 const CUSTOMER_NOTES = [
   "Please review your plan details and coupon code before confirming the order.",
@@ -493,6 +494,7 @@ export default function CheckoutPage() {
 
     try {
       setIsSubmitting(true);
+      const affiliateCode = getStoredAffiliateCode();
 
       const response = await fetch("/api/v1/checkout", {
         method: "POST",
@@ -504,6 +506,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           plan_id: normalizedPlanId,
           payment_method: paymentMethod,
+          ...(affiliateCode ? { affiliate_code: affiliateCode } : {}),
           ...(couponCode.trim() ? { coupon_code: couponCode.trim() } : {}),
           ...(orderComment.trim() ? { order_comment: orderComment.trim() } : {}),
         }),

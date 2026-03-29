@@ -1,6 +1,7 @@
 "use client";
 
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import { getStoredAffiliateCode } from "@/lib/affiliate-attribution";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -117,8 +118,9 @@ export default function PlaceOrderPage() {
         const planIdentifier: number | string = /^\d+$/.test(normalizedPlanId)
           ? Number(normalizedPlanId)
           : normalizedPlanId;
+        const affiliateCode = getStoredAffiliateCode();
 
-        const response = await fetch("/api/v1/orders", {
+        const response = await fetch("/api/v1/checkout", {
           method: "POST",
           headers: {
             Accept: "application/json",
@@ -127,6 +129,7 @@ export default function PlaceOrderPage() {
           },
           body: JSON.stringify({
             plan_id: planIdentifier,
+            ...(affiliateCode ? { affiliate_code: affiliateCode } : {}),
           }),
         });
 

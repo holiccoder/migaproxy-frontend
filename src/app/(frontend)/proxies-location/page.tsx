@@ -15,7 +15,7 @@ export default function ProxiesLocationPage() {
       <section className="container mx-auto px-4 lg:px-8 pt-28 pb-4 lg:pt-36">
         <nav className="text-sm text-muted-foreground mb-6">
           <Link href="/" className="hover:text-foreground transition-colors">
-            GoProxy
+            MigaProxy
           </Link>
           <span className="mx-2">/</span>
           <span className="text-foreground">Proxies Location</span>

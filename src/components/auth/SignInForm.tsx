@@ -26,6 +26,22 @@ type LoginResponse = {
   };
 };
 
+const DEFAULT_POST_LOGIN_PATH = "/user/dashboard";
+
+const toSafeRedirectPath = (value: string | null): string => {
+  if (!value) {
+    return DEFAULT_POST_LOGIN_PATH;
+  }
+
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue.startsWith("/") || trimmedValue.startsWith("//")) {
+    return DEFAULT_POST_LOGIN_PATH;
+  }
+
+  return trimmedValue;
+};
+
 export default function SignInForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -138,7 +154,8 @@ export default function SignInForm() {
         document.cookie = authCookieBase;
       }
 
-      router.push("/user/dashboard");
+      const redirectParam = new URLSearchParams(window.location.search).get("redirect");
+      router.push(toSafeRedirectPath(redirectParam));
     } catch {
       setFormError("Network error while signing in. Please try again.");
     } finally {

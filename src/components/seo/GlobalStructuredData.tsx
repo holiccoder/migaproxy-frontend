@@ -7,10 +7,10 @@ export default function GlobalStructuredData() {
   return (
     <OrganizationJsonLd
       type="Organization"
-      name="GoProxy"
+      name="MigaProxy"
       url={ENV.APP_BASE_URL}
       logo={ORGANIZATION_LOGO}
-      email="support@goproxy.com"
+      email="support@migaproxy.com"
     />
   );
 }

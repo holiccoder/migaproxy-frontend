@@ -113,8 +113,58 @@ export const ipmartApi = {
     apiClient.get(`/v1/ipmart/proxy-states?country_code=${encodeURIComponent(countryCode)}`, token),
   getProxyCities: (countryCode: string, state: string, token?: string) =>
     apiClient.get(`/v1/ipmart/proxy-cities?country_code=${encodeURIComponent(countryCode)}&state=${encodeURIComponent(state)}`, token),
-  getProxyApiLink: (data: any, token?: string) =>
-    apiClient.post("/v1/ipmart/proxy-api-link", data, token),
+  getProxyApiLink: (
+    params: {
+      cntryCode?: string;
+      stateName?: string;
+      cityName?: string;
+      format: string;
+      num: number;
+      time: number;
+      apiCntryCode?: string;
+    },
+    token?: string,
+  ) => {
+    const query = new URLSearchParams();
+    query.set("cntryCode", params.cntryCode ?? "");
+    query.set("format", params.format);
+    query.set("num", String(params.num));
+    query.set("time", String(params.time));
+    if (params.stateName) query.set("stateName", params.stateName);
+    if (params.cityName) query.set("cityName", params.cityName);
+    if (params.apiCntryCode) query.set("apiCntryCode", params.apiCntryCode);
+
+    const queryString = query.toString();
+    const endpoint = `/v1/ipmart/proxy-api-link${queryString ? `?${queryString}` : ""}`;
+
+    return apiClient.get(endpoint, token).then((response) => {
+      if (!response.success || !response.data) {
+        return response;
+      }
+
+      const replaceHost = (value: unknown): unknown => {
+        if (typeof value === "string") {
+          return value.replace(/proxy\.ipmart\.io/gi, "proxy.migaproxy.com");
+        }
+        if (Array.isArray(value)) {
+          return value.map(replaceHost);
+        }
+        if (value && typeof value === "object") {
+          const result: Record<string, unknown> = {};
+          for (const [key, val] of Object.entries(value)) {
+            result[key] = replaceHost(val);
+          }
+          return result;
+        }
+        return value;
+      };
+
+      return {
+        ...response,
+        data: replaceHost(response.data),
+      };
+    });
+  },
   generateTestLink: (
     params: Record<string, string | number | undefined>,
     token?: string,

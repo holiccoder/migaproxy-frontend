@@ -1,0 +1,177 @@
+{
+  "route": "/pricing/residential-proxies",
+  "seo": {
+    "title": "Residential Proxy Pricing | Flexible Plans for Every Team",
+    "description": "Compare MigaProxy residential proxy plans with transparent pricing, flexible traffic options, and reliable global coverage.",
+    "path": "/pricing/residential-proxies",
+    "keywords": [
+      "residential proxy pricing",
+      "proxy plans",
+      "buy proxies"
+    ]
+  },
+  "heroSection": {
+    "eyebrow": "Pricing / Residential Proxies",
+    "title": "Residential Proxies Pricing",
+    "description": "Transparent, volume-based plans built for teams that need global access, high success rates, and predictable performance."
+  },
+  "plansSection": {
+    "title": "Tiered Pricing Plans",
+    "description": "Scale from starter packs to enterprise-grade volume. Rates decrease as your usage grows.",
+    "highlight": {
+      "label": "As low as",
+      "value": "$0.75/GB"
+    },
+    "ctaDefaultLabel": "Choose Plan",
+    "ctaCustomLabel": "Contact Sales",
+    "plans": [
+      {
+        "name": "1GB",
+        "price": "$5",
+        "rate": "$5.00/GB"
+      },
+      {
+        "name": "3GB",
+        "price": "$12",
+        "rate": "$4.00/GB"
+      },
+      {
+        "name": "10GB",
+        "price": "$35",
+        "rate": "$3.50/GB"
+      },
+      {
+        "name": "25GB",
+        "price": "$75",
+        "rate": "$3.00/GB"
+      },
+      {
+        "name": "50GB",
+        "price": "$140",
+        "rate": "$2.80/GB"
+      },
+      {
+        "name": "100GB",
+        "price": "$270",
+        "rate": "$2.70/GB"
+      },
+      {
+        "name": "200GB",
+        "price": "$520",
+        "rate": "$2.60/GB"
+      },
+      {
+        "name": "500GB",
+        "price": "$1,250",
+        "rate": "$2.50/GB"
+      },
+      {
+        "name": "1000GB",
+        "price": "$1,600",
+        "rate": "$1.60/GB"
+      },
+      {
+        "name": "1500GB",
+        "price": "$1,275",
+        "rate": "$0.85/GB"
+      },
+      {
+        "name": "2000GB",
+        "price": "$1,500",
+        "rate": "$0.75/GB",
+        "badge": "Best Rate"
+      },
+      {
+        "name": "Custom",
+        "price": "Let's Talk",
+        "rate": "Tailored rate"
+      }
+    ]
+  },
+  "featuresSection": {
+    "title": "Built for Performance, Flexibility, and Reliability",
+    "description": "Residential proxies that keep your workflows fast, adaptive, and private, whether you run a few jobs or thousands.",
+    "features": [
+      {
+        "icon": "Activity",
+        "title": "High success rates",
+        "description": "Consistent performance with fast response times at scale."
+      },
+      {
+        "icon": "Globe",
+        "title": "Global geo-targeting",
+        "description": "Target countries, regions, and cities with precision on-demand."
+      },
+      {
+        "icon": "Zap",
+        "title": "Unlimited concurrent sessions",
+        "description": "Run large parallel workloads without caps on concurrent connections."
+      },
+      {
+        "icon": "Shield",
+        "title": "Secure & private network",
+        "description": "Automatic rotation and privacy safeguards keep your traffic protected."
+      }
+    ]
+  },
+  "paymentsSection": {
+    "title": "Flexible Payments & Secure Checkout",
+    "description": "Pay with cards or digital wallets. All transactions are encrypted and secured end-to-end.",
+    "methods": [
+      "Visa",
+      "Mastercard",
+      "PayPal",
+      "Google Pay",
+      "Apple Pay",
+      "Digital Wallets"
+    ]
+  },
+  "useCasesSection": {
+    "title": "Popular Use Cases",
+    "description": "Purpose-built for teams that rely on accurate, geo-diverse data.",
+    "useCases": [
+      {
+        "icon": "ShieldCheck",
+        "title": "Ad Verification",
+        "description": "Confirm placements, detect fraud, and validate geo-specific campaigns."
+      },
+      {
+        "icon": "Search",
+        "title": "SEO Monitoring",
+        "description": "Track rankings and SERP features across locations without bias."
+      },
+      {
+        "icon": "LineChart",
+        "title": "Market Research",
+        "description": "Collect competitive intelligence and pricing signals at scale."
+      },
+      {
+        "icon": "Users",
+        "title": "Social Media Management",
+        "description": "Operate multiple accounts safely with residential session control."
+      }
+    ]
+  },
+  "faqSection": {
+    "title": "Pricing FAQ",
+    "description": "Quick answers about usage, billing, and setup.",
+    "faqs": [
+      {
+        "question": "How is data usage measured?",
+        "answer": "Usage is based on total bandwidth consumed. Both successful and failed requests count toward usage."
+      },
+      {
+        "question": "What billing cycles are available?",
+        "answer": "Plans are billed monthly by default. Annual commitments are available for enterprise contracts."
+      },
+      {
+        "question": "Can I switch or upgrade plans anytime?",
+        "answer": "Yes. You can upgrade at any time. We'll prorate the difference based on remaining balance."
+      },
+      {
+        "question": "How fast is setup?",
+        "answer": "Provisioning is instant. Access credentials and endpoints are available immediately after purchase."
+      }
+    ]
+  }
+}
