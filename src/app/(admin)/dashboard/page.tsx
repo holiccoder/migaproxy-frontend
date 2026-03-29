@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import DashboardLatestActivity from "@/components/dashboard/DashboardLatestActivity";
 import DashboardTrafficHistoryChart from "@/components/dashboard/DashboardTrafficHistoryChart";
 import DashboardWalletBalanceCard from "@/components/dashboard/DashboardWalletBalanceCard";
+import AvailableTrafficCard from "@/components/dashboard/AvailableTrafficCard";
 
 export const metadata: Metadata = {
   title:
@@ -19,10 +20,7 @@ export default function Ecommerce() {
           </div>
           <div className="border-t border-gray-100 dark:border-gray-800 p-4 sm:p-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]">
-                <p className="text-xs uppercase text-gray-500 dark:text-gray-400">Available Traffic</p>
-                <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">0 GB</p>
-              </div>
+              <AvailableTrafficCard />
 
               <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]">
                 <p className="text-xs uppercase text-gray-500 dark:text-gray-400">History Traffic</p>
